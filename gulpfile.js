@@ -12,8 +12,7 @@ source = [
   'src/bindings.coffee',
   'src/binders.coffee',
   'src/formatters.coffee',
-  'src/adapter.coffee',
-  'src/export.coffee'
+  'src/adapter.coffee'
 ]
 
 gulp.task('build', function() {

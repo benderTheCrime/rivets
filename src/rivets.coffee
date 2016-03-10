@@ -1,5 +1,7 @@
 # The Rivets namespace.
 Rivets =
+  sightglass: require 'sightglass'
+
   options: [
     'prefix'
     'templateDelimiters'
@@ -18,6 +20,7 @@ Rivets =
 
   # The public interface (this is the exported module object).
   public:
+
     # Global binders.
     binders: {}
 
@@ -40,10 +43,10 @@ Rivets =
     rootInterface: '.'
 
     # Preload data by default.
-    preloadData: true,
+    preloadData: true
 
     # Execute functions in bindings. Defaultis false since rivets 0.9. Set to true to be backward compatible with rivets 0.8.
-    executeFunctions: true,
+    executeFunctions: true
 
     # Alias for index in rv-each binder
     iterationAlias : (modelName) ->
@@ -58,3 +61,5 @@ Rivets =
       view = new Rivets.View(el, models, options)
       view.bind()
       view
+
+module.exports = Rivets.public;
