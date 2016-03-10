@@ -9,7 +9,12 @@ Rivets.public.binders.text = (el, value) ->
 
 # Sets the element's HTML content.
 Rivets.public.binders.html = (el, value) ->
+  value = value.outerHTML if (value instanceof HTMLElement)
+
+  return this.text(el, value) if typeof value? is 'string'
+
   el.innerHTML = if value? then value else ''
+
 
 # Shows the element when value is true.
 Rivets.public.binders.show = (el, value) ->
