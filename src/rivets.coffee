@@ -1,6 +1,14 @@
-# The Rivets namespace.
+parsers = require './parsers.coffee'
+bindings = require './bindings.coffee'
+
 Rivets =
   sightglass: require 'sightglass'
+  View: require './view.coffee'
+  TypeParser: parsers.TypeParser
+  TextTemplateParser: parsers.TextTemplateParser
+  Binding: bindings.Binding
+  ComponentBinding: bindings.ComponentBinding
+  TextBinding: bindings.TextBinding
 
   options: [
     'prefix'
@@ -22,16 +30,16 @@ Rivets =
   public:
 
     # Global binders.
-    binders: {}
+    binders: require './binders.coffee'
 
     # Global components.
     components: {}
 
     # Global formatters.
-    formatters: {}
+    formatters: call: (value, args...) -> value.call @, args...
 
     # Global sightglass adapters.
-    adapters: {}
+    adapters: require './adapter.coffee'
 
     # Default attribute prefix.
     prefix: 'cb'
@@ -61,5 +69,10 @@ Rivets =
       view = new Rivets.View(el, models, options)
       view.bind()
       view
+
+# TODO finish fixing binders
+# TODO remove comments, one line iterationAlias
+# TODO remove components
+# TODO remove component binding
 
 module.exports = Rivets.public;

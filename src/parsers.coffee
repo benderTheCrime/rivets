@@ -2,7 +2,7 @@
 # ---------------------
 
 # Parser and tokenizer for getting the type and value of a primitive or keypath.
-class Rivets.TypeParser
+module.exports.TypeParser = class
   @types:
     primitive: 0
     keypath: 1
@@ -38,7 +38,7 @@ class Rivets.TypeParser
 
 # Rivets.js text template parser and tokenizer for mustache-style text content
 # binding declarations.
-class Rivets.TextTemplateParser
+module.exports.TextTemplateParser = class
   @types:
     text: 0
     binding: 1

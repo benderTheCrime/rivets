@@ -2,7 +2,7 @@
 # --------------
 
 # A single binding between a model attribute and a DOM element.
-class Rivets.Binding
+module.exports.Binding = class Binding
   # All information about the binding is passed into the constructor; the
   # containing view, the DOM node, the type of binding, the model object and the
   # keypath at which to listen for changes.
@@ -166,7 +166,7 @@ class Rivets.Binding
 # -----------------------
 
 # A component view encapsulated as a binding within it's parent view.
-class Rivets.ComponentBinding extends Rivets.Binding
+module.exports.ComponentBinding = class extends Binding
   # Initializes a component binding for the specified view. The raw component
   # element is passed in along with the component type. Attributes and scope
   # inflections are determined based on the components defined attributes.
@@ -273,7 +273,7 @@ class Rivets.ComponentBinding extends Rivets.Binding
 
 # A text node binding, defined internally to deal with text and element node
 # differences while avoiding it being overwritten.
-class Rivets.TextBinding extends Rivets.Binding
+module.exports.TextBinding = class extends Binding
   # Initializes a text binding for the specified view and text node.
   constructor: (@view, @el, @type, @keypath, @options = {}) ->
     @formatters = @options.formatters or []

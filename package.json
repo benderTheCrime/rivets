@@ -1,5 +1,5 @@
 {
-  "name": "rivets",
+  "name": "tiny-rivets",
   "description": "Declarative data binding + templating solution.",
   "version": "0.8.1",
   "author": "Michael Richards",
@@ -17,12 +17,5 @@
   },
   "dependencies": {
     "sightglass": "~0.2.4"
-  },
-  "devDependencies": {
-    "gulp": "~3.8.7",
-    "gulp-util": "~2.2.14",
-    "gulp-coffee": "~1.4.3",
-    "gulp-concat": "~2.2.0",
-    "gulp-uglify": "~0.3.0"
   }
 }

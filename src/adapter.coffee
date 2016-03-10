@@ -1,7 +1,6 @@
-# The default `.` adapter thats comes with Rivets.js. Allows subscribing to
-# properties on plain objects, implemented in ES5 natives using
-# `Object.defineProperty`.
-Rivets.public.adapters['.'] =
+adapters = {}
+
+adapters['.'] =
   id: '_rv'
   counter: 0
   weakmap: {}
@@ -102,3 +101,5 @@ Rivets.public.adapters['.'] =
 
   set: (obj, keypath, value) ->
     obj[keypath] = value
+
+module.exports = adapters

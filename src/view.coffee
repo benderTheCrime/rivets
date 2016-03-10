@@ -2,7 +2,7 @@
 # -----------
 
 # A collection of bindings built from a set of parent nodes.
-class Rivets.View
+module.exports = class
   # The DOM elements and the model objects for binding are passed into the
   # constructor along with any local options that should be used throughout the
   # context of the view and it's bindings.

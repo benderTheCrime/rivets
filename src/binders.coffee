@@ -1,14 +1,14 @@
-# Basic set of core binders that are included with Rivets.js.
+binders = {}
 
 # Sets the element's text value.
-Rivets.public.binders.text = (el, value) ->
+binders.text = (el, value) ->
   if el.textContent?
     el.textContent = if value? then value else ''
   else
     el.innerText = if value? then value else ''
 
 # Sets the element's HTML content.
-Rivets.public.binders.html = (el, value) ->
+binders.html = (el, value) ->
   value = value.outerHTML if (value instanceof HTMLElement)
 
   return this.text(el, value) if typeof value? is 'string'
@@ -16,24 +16,24 @@ Rivets.public.binders.html = (el, value) ->
   el.innerHTML = if value? then value else ''
 
 # Shows the element when value is true.
-Rivets.public.binders.show = (el, value) ->
+binders.show = (el, value) ->
   el.style.display = if value then '' else 'none'
 
 # Hides the element when value is true (negated version of `show` binder).
-Rivets.public.binders.hide = (el, value) ->
+binders.hide = (el, value) ->
   el.style.display = if value then 'none' else ''
 
 # Enables the element when value is true.
-Rivets.public.binders.enabled = (el, value) ->
+binders.enabled = (el, value) ->
   el.disabled = !value
 
 # Disables the element when value is true (negated version of `enabled` binder).
-Rivets.public.binders.disabled = (el, value) ->
+binders.disabled = (el, value) ->
   el.disabled = !!value
 
 # Sets the element's value. Also sets the model property when the input changes
 # (two-way binder).
-Rivets.public.binders.value =
+binders.value =
   publishes: true
   priority: 3000
 
@@ -61,7 +61,7 @@ Rivets.public.binders.value =
         el.value = if value? then value else ''
 
 # Inserts and binds the element and it's child nodes into the DOM when true.
-Rivets.public.binders.if =
+binders.if =
   block: true
   priority: 4000
 
@@ -99,24 +99,24 @@ Rivets.public.binders.if =
 
 # Removes and unbinds the element and it's child nodes into the DOM when true
 # (negated version of `if` binder).
-Rivets.public.binders.unless =
+binders.unless =
   block: true
   priority: 4000
 
   bind: (el) ->
-    Rivets.public.binders.if.bind.call @, el
+    binders.if.bind.call @, el
 
   unbind: ->
-    Rivets.public.binders.if.unbind.call @
+    binders.if.unbind.call @
 
   routine: (el, value) ->
-    Rivets.public.binders.if.routine.call @, el, not value
+    binders.if.routine.call @, el, not value
 
   update: (models) ->
-    Rivets.public.binders.if.update.call @, models
+    binders.if.update.call @, models
 
 # Binds an event handler on the element.
-Rivets.public.binders['on-*'] =
+binders['on-*'] =
   function: true
   priority: 1000
 
@@ -128,7 +128,7 @@ Rivets.public.binders['on-*'] =
     el.addEventListener @args[0], @handler = @eventHandler value
 
 # Appends bound instances of the element in place for each item in the array.
-Rivets.public.binders['each-*'] =
+binders['each-*'] =
   block: true
   priority: 4000
 
@@ -202,7 +202,7 @@ Rivets.public.binders['each-*'] =
     return
 
 # Adds or removes the class from the element when value is true or false.
-Rivets.public.binders['class-*'] = (el, value) ->
+binders['class-*'] = (el, value) ->
   elClass = " #{el.className} "
 
   if !value is (elClass.indexOf(" #{@args[0]} ") isnt -1)
@@ -213,8 +213,10 @@ Rivets.public.binders['class-*'] = (el, value) ->
 
 # Sets the attribute on the element. If no binder above is matched it will fall
 # back to using this binder.
-Rivets.public.binders['*'] = (el, value) ->
+binders['*'] = (el, value) ->
   if value?
     el.setAttribute @type, value
   else
     el.removeAttribute @type
+
+module.exports = binders;
