@@ -15,15 +15,11 @@ Rivets =
   extensions: [
     'binders'
     'formatters'
-    'components'
     'adapters'
   ]
 
   # The public interface (this is the exported module object).
   public:
-
-    # Global components.
-    components: {}
 
     # Global formatters.
     formatters: call: (value, args...) -> value.call @, args...
@@ -62,7 +58,7 @@ Rivets =
 
 Rivets.View = require('./view.coffee') Rivets
 Rivets.Binding = require('./binding/binding.coffee') Rivets
-Rivets.ComponentBinding = require('./binding/component-binding.coffee') Rivets
+# Rivets.ComponentBinding = require('./binding/component-binding.coffee') Rivets
 Rivets.TextBinding = require('./binding/text-binding.coffee') Rivets
 
 Rivets.public.binders = require('./binder.coffee') Rivets

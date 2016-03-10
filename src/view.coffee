@@ -98,13 +98,6 @@ module.exports = (Rivets) ->
           type = attribute.name.replace bindingRegExp, ''
           @buildBinding 'Binding', node, type, attribute.value
 
-      unless block
-        type = node.nodeName.toLowerCase()
-
-        if @components[type] and not node._bound
-          @bindings.push new Rivets.ComponentBinding @, node, type
-          block = true
-
       block
 
     # Returns an array of bindings where the supplied function evaluates to true.
