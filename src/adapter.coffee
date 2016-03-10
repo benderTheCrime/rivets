@@ -96,10 +96,7 @@ adapters['.'] =
         @unobserveMutations obj[keypath], obj[@id], keypath
         @cleanupWeakReference map, obj[@id]
 
-  get: (obj, keypath) ->
-    obj[keypath]
-
-  set: (obj, keypath, value) ->
-    obj[keypath] = value
+  get: (obj, keypath) -> obj[keypath]
+  set: (obj, keypath, value) -> obj[keypath] = value
 
 module.exports = adapters

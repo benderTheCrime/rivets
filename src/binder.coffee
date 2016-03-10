@@ -68,9 +68,7 @@ module.exports = (Rivets) ->
         el.parentNode.insertBefore @marker, el
         el.parentNode.removeChild el
 
-    unbind: ->
-      @nested?.unbind()
-
+    unbind: -> @nested?.unbind()
     routine: (el, value) ->
       if !!value is not @bound
         if value
@@ -85,8 +83,7 @@ module.exports = (Rivets) ->
           @nested.unbind()
           @bound = false
 
-    update: (models) ->
-      @nested?.update models
+    update: (models) -> @nested?.update models
 
   # Removes and unbinds the element and it's child nodes into the DOM when true
   # (negated version of `if` binder).
@@ -94,26 +91,17 @@ module.exports = (Rivets) ->
     block: true
     priority: 4000
 
-    bind: (el) ->
-      binders.if.bind.call @, el
-
-    unbind: ->
-      binders.if.unbind.call @
-
-    routine: (el, value) ->
-      binders.if.routine.call @, el, not value
-
-    update: (models) ->
-      binders.if.update.call @, models
+    bind: (el) -> binders.if.bind.call @, el
+    unbind: -> binders.if.unbind.call @
+    routine: (el, value) -> binders.if.routine.call @, el, not value
+    update: (models) -> binders.if.update.call @, models
 
   # Binds an event handler on the element.
   binders['on-*'] =
     function: true
     priority: 1000
 
-    unbind: (el) ->
-      el.removeEventListener @args[0], @handler if @handler
-
+    unbind: (el) -> el.removeEventListener @args[0], @handler if @handler
     routine: (el, value) ->
       el.removeEventListener @args[0], @handler if @handler
       el.addEventListener @args[0], @handler = @eventHandler value
@@ -153,7 +141,7 @@ module.exports = (Rivets) ->
 
       for model, index in collection
         data = {index}
-        data[Rivets.public.iterationAlias modelName] = index
+        data[Rivets.iterationAlias modelName] = index
         data[modelName] = model
 
         if not @iterated[index]?

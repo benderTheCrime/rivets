@@ -1,30 +1,24 @@
 module.exports = (Rivets) ->
-  module.exports = class
+  class
     constructor: (@els, @models, options = {}) ->
-      @els = [@els] unless (@els instanceof Array)
-
-      for option in Rivets.extensions
-        @[option] = {}
-        @[option][k] = v for k, v of options[option] if options[option]
-        @[option][k] ?= v for k, v of Rivets.public[option]
-
-      for option in Rivets.options
-        @[option] = options[option] ? Rivets.public[option]
+      publicKeys = [
+        'prefix'
+        'preloadData'
+        'handler'
+        'executeFunctions'
+        'binders'
+        'formatters'
+        'adapters'
+        'rootAdapter'
+        'rootInterface'
+      ]
+      @els = [ @els ] unless (@els instanceof Array)
+      @[ key ] = Rivets[ key ] for key in publicKeys
 
       @build()
 
-    options: =>
-      options = {}
-
-      for option in Rivets.extensions.concat Rivets.options
-        options[option] = @[option]
-
-      options
-
-    # Regular expression used to match binding attributes.
-    bindingRegExp: =>
-      new RegExp "^#{@prefix}-"
-
+    options: => {}
+    bindingRegExp: => new RegExp "^#{@prefix}-"
     buildBinding: (binding, node, type, declaration) =>
       options = {}
 
@@ -48,29 +42,29 @@ module.exports = (Rivets) ->
         if node.nodeType is 3
           parser = Rivets.TextTemplateParser
 
-          if delimiters = @templateDelimiters
-            if (tokens = parser.parse(node.data, delimiters)).length
-              unless tokens.length is 1 and tokens[0].type is parser.types.text
-                for token in tokens
-                  text = document.createTextNode token.value
-                  node.parentNode.insertBefore text, node
+          if (tokens = parser.parse(node.data)).length
+            unless tokens.length is 1 and tokens[0].type is parser.types.text
+              for token in tokens
+                text = document.createTextNode token.value
+                node.parentNode.insertBefore text, node
 
-                  if token.type is 1
-                    @buildBinding 'TextBinding', text, null, token.value
-                node.parentNode.removeChild node
+                if token.type is 1
+                  @buildBinding 'TextBinding', text, null, token.value
+              node.parentNode.removeChild node
         else if node.nodeType is 1
           block = @traverse node
 
         unless block
           parse childNode for childNode in (n for n in node.childNodes)
-        return
+
+        undefined
 
       parse el for el in @els
 
       @bindings.sort (a, b) ->
         (b.binder?.priority or 0) - (a.binder?.priority or 0)
 
-      return
+      undefined
 
     traverse: (node) =>
       bindingRegExp = @bindingRegExp()
@@ -100,32 +94,30 @@ module.exports = (Rivets) ->
 
       block
 
-    # Returns an array of bindings where the supplied function evaluates to true.
-    select: (fn) =>
-      binding for binding in @bindings when fn binding
+    select: (fn) => binding for binding in @bindings when fn binding
 
     # Binds all of the current bindings for this view.
     bind: =>
       binding.bind() for binding in @bindings
-      return
+      undefined
 
     # Unbinds all of the current bindings for this view.
     unbind: =>
       binding.unbind() for binding in @bindings
-      return
+      undefined
 
     # Syncs up the view with the model by running the routines on all bindings.
     sync: =>
       binding.sync?() for binding in @bindings
-      return
+      undefined
 
     # Publishes the input values from the view back to the model (reverse sync).
     publish: =>
       binding.publish() for binding in @select (b) -> b.binder?.publishes
-      return
+      undefined
 
     # Updates the view's models along with any affected bindings.
     update: (models = {}) =>
       @models[key] = model for key, model of models
       binding.update? models for binding in @bindings
-      return
+      undefined
