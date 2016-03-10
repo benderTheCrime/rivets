@@ -15,7 +15,6 @@ Rivets.public.binders.html = (el, value) ->
 
   el.innerHTML = if value? then value else ''
 
-
 # Shows the element when value is true.
 Rivets.public.binders.show = (el, value) ->
   el.style.display = if value then '' else 'none'
