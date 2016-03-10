@@ -27,43 +27,6 @@ Rivets.public.binders.enabled = (el, value) ->
 Rivets.public.binders.disabled = (el, value) ->
   el.disabled = !!value
 
-# Checks a checkbox or radio input when the value is true. Also sets the model
-# property when the input is checked or unchecked (two-way binder).
-Rivets.public.binders.checked =
-  publishes: true
-  priority: 2000
-
-  bind: (el) ->
-    Rivets.Util.bindEvent el, 'change', @publish
-
-  unbind: (el) ->
-    Rivets.Util.unbindEvent el, 'change', @publish
-
-  routine: (el, value) ->
-    if el.type is 'radio'
-      el.checked = el.value?.toString() is value?.toString()
-    else
-      el.checked = !!value
-
-# Unchecks a checkbox or radio input when the value is true (negated version of
-# `checked` binder). Also sets the model property when the input is checked or
-# unchecked (two-way binder).
-Rivets.public.binders.unchecked =
-  publishes: true
-  priority: 2000
-
-  bind: (el) ->
-    Rivets.Util.bindEvent el, 'change', @publish
-
-  unbind: (el) ->
-    Rivets.Util.unbindEvent el, 'change', @publish
-
-  routine: (el, value) ->
-    if el.type is 'radio'
-      el.checked = el.value?.toString() isnt value?.toString()
-    else
-      el.checked = !value
-
 # Sets the element's value. Also sets the model property when the input changes
 # (two-way binder).
 Rivets.public.binders.value =
@@ -73,11 +36,11 @@ Rivets.public.binders.value =
   bind: (el) ->
     unless el.tagName is 'INPUT' and el.type is 'radio'
       @event = if el.tagName is 'SELECT' then 'change' else 'input'
-      Rivets.Util.bindEvent el, @event, @publish
+      el.addEventListener @event, @publish
 
   unbind: (el) ->
     unless el.tagName is 'INPUT' and el.type is 'radio'
-      Rivets.Util.unbindEvent el, @event, @publish
+      el.removeEventListener @event, @publish
 
   routine: (el, value) ->
     if el.tagName is 'INPUT' and el.type is 'radio'
@@ -154,11 +117,11 @@ Rivets.public.binders['on-*'] =
   priority: 1000
 
   unbind: (el) ->
-    Rivets.Util.unbindEvent el, @args[0], @handler if @handler
+    el.removeEventListener @args[0], @handler if @handler
 
   routine: (el, value) ->
-    Rivets.Util.unbindEvent el, @args[0], @handler if @handler
-    Rivets.Util.bindEvent el, @args[0], @handler = @eventHandler value
+    el.removeEventListener @args[0], @handler if @handler
+    el.addEventListener @args[0], @handler = @eventHandler value
 
 # Appends bound instances of the element in place for each item in the array.
 Rivets.public.binders['each-*'] =

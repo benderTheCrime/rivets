@@ -6,7 +6,6 @@ uglify = require('gulp-uglify')
 
 source = [
   'src/rivets.coffee',
-  'src/util.coffee',
   'src/parsers.coffee',
   'src/observer.coffee',
   'src/view.coffee',

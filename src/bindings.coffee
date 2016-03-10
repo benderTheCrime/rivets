@@ -155,7 +155,12 @@ class Rivets.Binding
     if @binder and @binder.getValue?
       @binder.getValue.call @, el
     else
-      Rivets.Util.getInputValue el
+      @getInputValue el
+
+  getInputValue: (el) ->
+    if el.type is 'checkbox' then el.checked
+    else if el.type is 'select-multiple' then o.value for o in el when o.selected
+    else el.value
 
 # Rivets.ComponentBinding
 # -----------------------
