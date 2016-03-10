@@ -1,10 +1,17 @@
 {
   "name": "tiny-rivets",
-  "description": "Declarative data binding + templating solution.",
+  "description": "A tiny RivetsJS fork",
   "version": "0.8.1",
   "author": "Michael Richards",
-  "url": "http://rivetsjs.com",
-  "main": "./dist/rivets.js",
+  "contributors": [
+    {
+      "name": "Michael Richards",
+      "url": "http://rivetsjs.com"
+    },
+    {
+      "name": "Joe Groseclose <@benderThe Crime>"
+    }
+  ],
   "licenses": [
     {
       "type": "MIT",
@@ -13,7 +20,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/mikeric/rivets.git"
+    "url": "https://github.com/benderTheCrime/tiny-rivets.git"
   },
   "dependencies": {
     "sightglass": "~0.2.4"
