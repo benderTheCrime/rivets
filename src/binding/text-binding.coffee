@@ -4,7 +4,5 @@ module.exports = (Rivets) ->
       @formatters = @options.formatters or []
       @dependencies = []
       @formatterObservers = {}
-    binder:
-      routine: (node, value) ->
-        node.data = value ? ''
+    binder: routine: (node, value) -> node.data = value ? ''
     sync: => super

@@ -1,7 +1,7 @@
 {
   "name": "tiny-rivets",
   "description": "A tiny RivetsJS fork",
-  "version": "0.8.1",
+  "version": "1.0.0",
   "author": "Michael Richards",
   "contributors": [
     {
@@ -16,6 +16,10 @@
     {
       "type": "MIT",
       "url": "https://github.com/mikeric/rivets/blob/master/LICENSE"
+    },
+    {
+      "type": "MIT",
+      "url": "https://github.com/benderTheCrime/tiny-rivets/blob/master/LICENSE"
     }
   ],
   "repository": {
