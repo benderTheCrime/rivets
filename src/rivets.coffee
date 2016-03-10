@@ -1,14 +1,7 @@
-parsers = require './parsers.coffee'
-bindings = require './bindings.coffee'
-
 Rivets =
   sightglass: require 'sightglass'
-  View: require './view.coffee'
-  TypeParser: parsers.TypeParser
-  TextTemplateParser: parsers.TextTemplateParser
-  Binding: bindings.Binding
-  ComponentBinding: bindings.ComponentBinding
-  TextBinding: bindings.TextBinding
+  TypeParser: require './parser/type-parser.coffee'
+  TextTemplateParser: require './parser/text-template-parser.coffee'
 
   options: [
     'prefix'
@@ -28,9 +21,6 @@ Rivets =
 
   # The public interface (this is the exported module object).
   public:
-
-    # Global binders.
-    binders: require './binders.coffee'
 
     # Global components.
     components: {}
@@ -70,6 +60,15 @@ Rivets =
       view.bind()
       view
 
+Rivets.View = require('./view.coffee') Rivets
+Rivets.Binding = require('./binding/binding.coffee') Rivets
+Rivets.ComponentBinding = require('./binding/component-binding.coffee') Rivets
+Rivets.TextBinding = require('./binding/text-binding.coffee') Rivets
+
+Rivets.public.binders = require('./binder.coffee') Rivets
+
+# TODO remove concept of public
+# TODO remove extensions & options
 # TODO finish fixing binders
 # TODO remove comments, one line iterationAlias
 # TODO remove components
