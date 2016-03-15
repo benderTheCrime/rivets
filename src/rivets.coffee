@@ -1,4 +1,4 @@
-Rivets =
+module.exports = Rivets =
   sightglass: require 'sightglass'
   TypeParser: require './parser/type-parser.coffee'
   TextTemplateParser: require './parser/text-template-parser.coffee'
@@ -19,5 +19,3 @@ Rivets.View = require('./view.coffee') Rivets
 Rivets.Binding = require('./binding/binding.coffee') Rivets
 Rivets.TextBinding = require('./binding/text-binding.coffee') Rivets
 Rivets.binders = require('./binder.coffee') Rivets
-
-module.exports = Rivets;

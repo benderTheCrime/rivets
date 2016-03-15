@@ -9,7 +9,7 @@
       "url": "http://rivetsjs.com"
     },
     {
-      "name": "Joe Groseclose <@benderThe Crime>"
+      "name": "Joe Groseclose <@benderTheCrime>"
     }
   ],
   "licenses": [
@@ -26,12 +26,19 @@
     "type": "git",
     "url": "https://github.com/benderTheCrime/tiny-rivets.git"
   },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  },
   "dependencies": {
     "sightglass": "~0.2.4"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.6.0",
     "coffee-loader": "^0.7.2",
     "coffee-script": "^1.10.0",
+    "gulp": "^3.9.1",
     "webpack": "^1.12.14"
   }
 }
