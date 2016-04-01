@@ -1,4 +1,4 @@
-module.exports = class
+Rivets.TypeParser = class
   @types:
     primitive: 0
     keypath: 1
