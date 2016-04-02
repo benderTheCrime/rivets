@@ -16,7 +16,7 @@ Rivets.js is a lightweight data binding and templating system that facilitates b
 ```
 
 ```javascript
-rivets.bind($('#auction'), {auction: auction})
+rivets.bind(document.getElementById('auction'), {auction: auction})
 ```
 
 ## Getting Started and Documentation

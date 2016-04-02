@@ -1,4 +1,4 @@
 Rivets.adapters = '.': new Observer
-Rivets.adapters[ '.' ] = '_cb'
+Rivets.adapters[ '.' ].id = '_cb'
 
 module.exports = Rivets
