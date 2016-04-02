@@ -47,11 +47,11 @@
       this.obj = obj;
       this.keypath = keypath;
       callbacks = this.weakReference(obj).callbacks;
-      value = this.walkObjectKeyPath(obj, keypath);
+      value = this.walkObjectKeypath(obj, keypath);
       parentKeypath = keypath.split('.');
       key = parentKeypath.pop();
       parentKeypath = parentKeypath.join('.');
-      parentValue = this.walkObjectKeyPath(obj, parentKeypath);
+      parentValue = this.walkObjectKeypath(obj, parentKeypath);
       if (callbacks[keypath] == null) {
         callbacks[keypath] = [];
       }
@@ -141,14 +141,14 @@
     };
 
     Observer.prototype.get = function() {
-      return this.walkObjectKeyPath.call(this, this.obj, this.keypath);
+      return this.walkObjectKeypath.call(this, this.obj, this.keypath);
     };
 
     Observer.prototype.set = function(value) {
-      return this.walkObjectKeyPath.call(this, this.obj, this.keypath, value);
+      return this.walkObjectKeypath.call(this, this.obj, this.keypath, value);
     };
 
-    Observer.prototype.walkObjectKeyPath = function(obj, keypath, value) {
+    Observer.prototype.walkObjectKeypath = function(obj, keypath, value) {
       var j, key, keys, lastKey, len, ref1, val;
       keys = keypath.split('.');
       lastKey = keys.reverse()[0];
@@ -952,7 +952,7 @@
     '.': new Observer
   };
 
-  Rivets.adapters['.'] = '_cb';
+  Rivets.adapters['.'].id = '_cb';
 
   module.exports = Rivets;
 

@@ -9,13 +9,13 @@ class Observer
     @keypath = keypath
     callbacks = @weakReference(obj).callbacks
 
-    value = @walkObjectKeyPath obj, keypath
+    value = @walkObjectKeypath obj, keypath
 
     parentKeypath = keypath.split '.'
     key = parentKeypath.pop()
 
     parentKeypath = parentKeypath.join '.'
-    parentValue = @walkObjectKeyPath obj, parentKeypath
+    parentValue = @walkObjectKeypath obj, parentKeypath
 
     unless callbacks[ keypath ]?
       callbacks[ keypath ] = []
@@ -70,10 +70,10 @@ class Observer
 
       response
 
-  get: () -> @walkObjectKeyPath.call @, @obj, @keypath
-  set: (value) -> @walkObjectKeyPath.call @, @obj, @keypath, value
+  get: () -> @walkObjectKeypath.call @, @obj, @keypath
+  set: (value) -> @walkObjectKeypath.call @, @obj, @keypath, value
 
-  walkObjectKeyPath: (obj, keypath, value) ->
+  walkObjectKeypath: (obj, keypath, value) ->
     keys = keypath.split '.'
     lastKey = keys.reverse()[ 0 ]
     val = obj

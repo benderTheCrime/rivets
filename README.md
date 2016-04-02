@@ -9,14 +9,14 @@ Rivets.js is a lightweight data binding and templating system that facilitates b
   <h3>{ auction.product.name }</h3>
   <p>Current bid: { auction.currentBid | money }</p>
 
-  <aside rv-if="auction.timeLeft | lt 120">
+  <aside cb-if="auction.timeLeft | lt 120">
     Hurry up! There is { auction.timeLeft | time } left.
   </aside>
 </section>
 ```
 
 ```javascript
-rivets.bind($('#auction'), {auction: auction})
+rivets.bind(document.getElementById('auction'), {auction: auction})
 ```
 
 ## Getting Started and Documentation
