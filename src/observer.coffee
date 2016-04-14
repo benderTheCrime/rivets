@@ -20,21 +20,24 @@ class Observer
     unless callbacks[ keypath ]?
       callbacks[ keypath ] = []
 
-    delete parentValue[ key ];
-    Object.defineProperty parentValue, key,
-      enumerable: true
-      configurable: true
-      get: -> value
-      set: (newValue) =>
-        if newValue isnt value
-          value = newValue
-          @observe obj, keypath, callback
-          cb() for cb in callbacks[ keypath ]
+    if parentValue and typeof parentValue is 'object'
+      if parentValue.hasOwnProperty key
+        delete parentValue[ key ]
 
-    unless callback in callbacks[ keypath ]
-      callbacks[ keypath ].push callback
+      Object.defineProperty parentValue, key,
+        enumerable: true
+        configurable: true
+        get: -> value
+        set: (newValue) =>
+          if newValue isnt value
+            value = newValue
+            @observe obj, keypath, callback
+            cb() for cb in callbacks[ keypath ]
 
-    @observeMutations value, obj[@id], key
+      unless callback in callbacks[ keypath ]
+        callbacks[ keypath ].push callback
+
+      @observeMutations value, obj[@id], key
 
   weakReference: (obj) ->
     unless obj.hasOwnProperty @id
@@ -81,8 +84,10 @@ class Observer
     for key in keys.reverse()
       if key is lastKey and value
         val = val[ key ] = value
-      else if val[ key ]?
+      # else if val?[ key ]
+      else if val[ key ]
         val = val[ key ]
-      else null
+      else
+        val = null
 
     val

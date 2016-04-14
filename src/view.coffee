@@ -1,5 +1,5 @@
 Rivets.View = class
-  constructor: (@els, @models, options = {}) ->
+  constructor: (@els, @models) ->
     @els = [ @els ] unless (@els instanceof Array)
     @binders = Rivets.binders
     @build()

@@ -18,8 +18,8 @@
     iterationAlias: function(modelName) {
       return "%" + modelName + "%";
     },
-    handler: function(context, ev, binding) {
-      return this.call(binding.view.models.scope, ev, context);
+    handler: function(instance, event, binding) {
+      return this.call(binding.view.models, event, event.target, binding.view.models);
     },
     bind: function(el, models, options) {
       var view;
@@ -55,34 +55,38 @@
       if (callbacks[keypath] == null) {
         callbacks[keypath] = [];
       }
-      delete parentValue[key];
-      Object.defineProperty(parentValue, key, {
-        enumerable: true,
-        configurable: true,
-        get: function() {
-          return value;
-        },
-        set: (function(_this) {
-          return function(newValue) {
-            var cb, j, len, ref1, results;
-            if (newValue !== value) {
-              value = newValue;
-              _this.observe(obj, keypath, callback);
-              ref1 = callbacks[keypath];
-              results = [];
-              for (j = 0, len = ref1.length; j < len; j++) {
-                cb = ref1[j];
-                results.push(cb());
+      if (parentValue && typeof parentValue === 'object') {
+        if (parentValue.hasOwnProperty(key)) {
+          delete parentValue[key];
+        }
+        Object.defineProperty(parentValue, key, {
+          enumerable: true,
+          configurable: true,
+          get: function() {
+            return value;
+          },
+          set: (function(_this) {
+            return function(newValue) {
+              var cb, j, len, ref1, results;
+              if (newValue !== value) {
+                value = newValue;
+                _this.observe(obj, keypath, callback);
+                ref1 = callbacks[keypath];
+                results = [];
+                for (j = 0, len = ref1.length; j < len; j++) {
+                  cb = ref1[j];
+                  results.push(cb());
+                }
+                return results;
               }
-              return results;
-            }
-          };
-        })(this)
-      });
-      if (indexOf.call(callbacks[keypath], callback) < 0) {
-        callbacks[keypath].push(callback);
+            };
+          })(this)
+        });
+        if (indexOf.call(callbacks[keypath], callback) < 0) {
+          callbacks[keypath].push(callback);
+        }
+        return this.observeMutations(value, obj[this.id], key);
       }
-      return this.observeMutations(value, obj[this.id], key);
     };
 
     Observer.prototype.weakReference = function(obj) {
@@ -158,10 +162,10 @@
         key = ref1[j];
         if (key === lastKey && value) {
           val = val[key] = value;
-        } else if (val[key] != null) {
+        } else if (val[key]) {
           val = val[key];
         } else {
-          null;
+          val = null;
         }
       }
       return val;
@@ -172,12 +176,9 @@
   })();
 
   Rivets.View = (function() {
-    function _Class(els, models1, options) {
+    function _Class(els, models1) {
       this.els = els;
       this.models = models1;
-      if (options == null) {
-        options = {};
-      }
       this.publish = bind(this.publish, this);
       this.unbind = bind(this.unbind, this);
       this.bind = bind(this.bind, this);
@@ -254,11 +255,11 @@
           }
           if (!block) {
             ref1 = (function() {
-              var len1, p, ref1, results;
+              var len1, o, ref1, results;
               ref1 = node.childNodes;
               results = [];
-              for (p = 0, len1 = ref1.length; p < len1; p++) {
-                n = ref1[p];
+              for (o = 0, len1 = ref1.length; o < len1; o++) {
+                n = ref1[o];
                 results.push(n);
               }
               return results;
@@ -733,27 +734,11 @@
       }
     },
     routine: function(el, value) {
-      var j, len, o, ref1, ref2, ref3, results;
+      var ref1;
       if (el.tagName === 'INPUT' && el.type === 'radio') {
         return el.setAttribute('value', value);
-      } else if (window.jQuery != null) {
-        el = jQuery(el);
-        if ((value != null ? value.toString() : void 0) !== ((ref1 = el.val()) != null ? ref1.toString() : void 0)) {
-          return el.val(value != null ? value : '');
-        }
-      } else {
-        if (el.type === 'select-multiple') {
-          if (value != null) {
-            results = [];
-            for (j = 0, len = el.length; j < len; j++) {
-              o = el[j];
-              results.push(o.selected = (ref2 = o.value, indexOf.call(value, ref2) >= 0));
-            }
-            return results;
-          }
-        } else if ((value != null ? value.toString() : void 0) !== ((ref3 = el.value) != null ? ref3.toString() : void 0)) {
-          return el.value = value != null ? value : '';
-        }
+      } else if ((value != null ? value.toString() : void 0) !== ((ref1 = el.value) != null ? ref1.toString() : void 0)) {
+        return el.value = value != null ? value : '';
       }
     }
   };
@@ -787,7 +772,7 @@
             model = ref1[key];
             models[key] = model;
           }
-          (this.nested || (this.nested = new Rivets.View(el, models, this.view.options()))).bind();
+          (this.nested || (this.nested = new Rivets.View(el, models))).bind();
           this.marker.parentNode.insertBefore(el, this.marker.nextSibling);
           return this.bound = true;
         } else {
@@ -867,7 +852,7 @@
       }
     },
     routine: function(el, collection) {
-      var binding, data, i, index, j, key, l, len, len1, len2, model, modelName, options, p, previous, ref1, ref2, ref3, template, view;
+      var binding, data, i, index, j, key, l, len, len1, len2, model, modelName, o, previous, ref1, ref2, ref3, template, view;
       modelName = this.args[0];
       collection = collection || [];
       if (this.iterated.length > collection.length) {
@@ -895,9 +880,8 @@
             }
           }
           previous = this.iterated.length ? this.iterated[this.iterated.length - 1].els[0] : this.marker;
-          options = this.view.options();
           template = el.cloneNode(true);
-          view = new Rivets.View(template, data, options);
+          view = new Rivets.View(template, data);
           view.bind();
           this.iterated.push(view);
           this.marker.parentNode.insertBefore(template, previous.nextSibling);
@@ -907,8 +891,8 @@
       }
       if (el.nodeName === 'OPTION') {
         ref3 = this.view.bindings;
-        for (p = 0, len2 = ref3.length; p < len2; p++) {
-          binding = ref3[p];
+        for (o = 0, len2 = ref3.length; o < len2; o++) {
+          binding = ref3[o];
           if (binding.el === this.marker.parentNode && binding.type === 'value') {
             binding.sync();
           }

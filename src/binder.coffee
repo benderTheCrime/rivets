@@ -61,7 +61,7 @@ binders.if =
         models = {}
         models[key] = model for key, model of @view.models
 
-        (@nested or= new Rivets.View(el, models, @view.options())).bind()
+        (@nested or= new Rivets.View(el, models)).bind()
         @marker.parentNode.insertBefore el, @marker.nextSibling
         @bound = true
       else
@@ -135,11 +135,8 @@ binders['each-*'] =
         else
           @marker
 
-        options = @view.options()
-        # options.preloadData = true
-
         template = el.cloneNode true
-        view = new Rivets.View(template, data, options)
+        view = new Rivets.View template, data
         view.bind()
         @iterated.push view
 

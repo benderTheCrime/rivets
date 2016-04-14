@@ -21,7 +21,7 @@ Rivets.Binding = class
 
   observe: (obj, keypath, callback) =>
     observer = new Observer
-    observer.observe.apply observer, arguments
+    observer.observe arguments...
     observer
 
   formattedValue: (value) =>
