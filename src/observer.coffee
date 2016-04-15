@@ -9,13 +9,17 @@ class Observer
     @keypath = keypath
     callbacks = @weakReference(obj).callbacks
 
-    value = @walkObjectKeypath obj, keypath
-
+    value = null
     parentKeypath = keypath.split '.'
     key = parentKeypath.pop()
 
     parentKeypath = parentKeypath.join '.'
-    @target = parentValue = @walkObjectKeypath obj, parentKeypath
+    if parentKeypath
+      @target = parentValue = @walkObjectKeypath obj, parentKeypath
+    else
+      @target = parentValue = obj
+
+    value = parentValue[ key ] if parentValue
 
     unless callbacks[ keypath ]?
       callbacks[ keypath ] = []
@@ -28,10 +32,10 @@ class Observer
         configurable: true
         get: -> value
         set: (newValue) =>
-          if newValue isnt value
-            value = newValue
-            @observe obj, keypath, callback
-            cb() for cb in callbacks[ keypath ]
+          # if newValue isnt value
+          value = newValue
+          @observe obj, keypath, callback
+          cb() for cb in callbacks[ keypath ]
 
       unless callback in callbacks[ keypath ]
         callbacks[ keypath ].push callback
@@ -77,19 +81,20 @@ class Observer
 
   walkObjectKeypath: (obj, keypath, value) ->
     keys = keypath.split '.'
-    lastKey = keys.reverse()[ 0 ]
+    lastKey = keys.slice(-1)[ 0 ]
     val = obj
 
-    for key in keys.reverse()
-      if key is lastKey
-        if value
-          val = value
-        else if val[key]?
+    if keys.length
+      for key in keys
+        if key is lastKey
+          if value
+            val = val[ key ] = value
+          else if val[key]?
+            val = val[ key ]
+          else
+            val = null
+        else if val[ key ]?
           val = val[ key ]
         else
-          val = null
-      else if val[ key ]?
-        val = val[ key ]
-      else
-        val = {}
+          val = {}
     val

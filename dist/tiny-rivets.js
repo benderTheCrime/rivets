@@ -47,11 +47,18 @@
       this.obj = obj;
       this.keypath = keypath;
       callbacks = this.weakReference(obj).callbacks;
-      value = this.walkObjectKeypath(obj, keypath);
+      value = null;
       parentKeypath = keypath.split('.');
       key = parentKeypath.pop();
       parentKeypath = parentKeypath.join('.');
-      this.target = parentValue = this.walkObjectKeypath(obj, parentKeypath);
+      if (parentKeypath) {
+        this.target = parentValue = this.walkObjectKeypath(obj, parentKeypath);
+      } else {
+        this.target = parentValue = obj;
+      }
+      if (parentValue) {
+        value = parentValue[key];
+      }
       if (callbacks[keypath] == null) {
         callbacks[keypath] = [];
       }
@@ -65,17 +72,15 @@
           set: (function(_this) {
             return function(newValue) {
               var cb, j, len, ref1, results;
-              if (newValue !== value) {
-                value = newValue;
-                _this.observe(obj, keypath, callback);
-                ref1 = callbacks[keypath];
-                results = [];
-                for (j = 0, len = ref1.length; j < len; j++) {
-                  cb = ref1[j];
-                  results.push(cb());
-                }
-                return results;
+              value = newValue;
+              _this.observe(obj, keypath, callback);
+              ref1 = callbacks[keypath];
+              results = [];
+              for (j = 0, len = ref1.length; j < len; j++) {
+                cb = ref1[j];
+                results.push(cb());
               }
+              return results;
             };
           })(this)
         });
@@ -150,25 +155,26 @@
     };
 
     Observer.prototype.walkObjectKeypath = function(obj, keypath, value) {
-      var j, key, keys, lastKey, len, ref1, val;
+      var j, key, keys, lastKey, len, val;
       keys = keypath.split('.');
-      lastKey = keys.reverse()[0];
+      lastKey = keys.slice(-1)[0];
       val = obj;
-      ref1 = keys.reverse();
-      for (j = 0, len = ref1.length; j < len; j++) {
-        key = ref1[j];
-        if (key === lastKey) {
-          if (value) {
-            val = value;
+      if (keys.length) {
+        for (j = 0, len = keys.length; j < len; j++) {
+          key = keys[j];
+          if (key === lastKey) {
+            if (value) {
+              val = val[key] = value;
+            } else if (val[key] != null) {
+              val = val[key];
+            } else {
+              val = null;
+            }
           } else if (val[key] != null) {
             val = val[key];
           } else {
-            val = null;
+            val = {};
           }
-        } else if (val[key] != null) {
-          val = val[key];
-        } else {
-          val = {};
         }
       }
       return val;
