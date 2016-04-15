@@ -51,14 +51,11 @@
       parentKeypath = keypath.split('.');
       key = parentKeypath.pop();
       parentKeypath = parentKeypath.join('.');
-      parentValue = this.walkObjectKeypath(obj, parentKeypath);
+      this.target = parentValue = this.walkObjectKeypath(obj, parentKeypath);
       if (callbacks[keypath] == null) {
         callbacks[keypath] = [];
       }
-      if (parentValue && typeof parentValue === 'object') {
-        if (parentValue.hasOwnProperty(key)) {
-          delete parentValue[key];
-        }
+      if (parentValue && typeof parentValue === 'object' && parentValue.hasOwnProperty(key)) {
         Object.defineProperty(parentValue, key, {
           enumerable: true,
           configurable: true,
@@ -85,14 +82,14 @@
         if (indexOf.call(callbacks[keypath], callback) < 0) {
           callbacks[keypath].push(callback);
         }
-        return this.observeMutations(value, obj[this.id], key);
+        return this.observeMutations(parentValue, obj[this.id], key);
       }
     };
 
     Observer.prototype.weakReference = function(obj) {
       var base, id, name;
       if (!obj.hasOwnProperty(this.id)) {
-        id = this.counter++;
+        id = (this.counter += 1);
         Object.defineProperty(obj, this.id, {
           value: id
         });
@@ -160,12 +157,18 @@
       ref1 = keys.reverse();
       for (j = 0, len = ref1.length; j < len; j++) {
         key = ref1[j];
-        if (key === lastKey && value) {
-          val = val[key] = value;
-        } else if (val[key]) {
+        if (key === lastKey) {
+          if (value) {
+            val = value;
+          } else if (val[key] != null) {
+            val = val[key];
+          } else {
+            val = null;
+          }
+        } else if (val[key] != null) {
           val = val[key];
         } else {
-          val = null;
+          val = {};
         }
       }
       return val;

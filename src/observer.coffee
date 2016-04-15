@@ -15,14 +15,13 @@ class Observer
     key = parentKeypath.pop()
 
     parentKeypath = parentKeypath.join '.'
-    parentValue = @walkObjectKeypath obj, parentKeypath
+    @target = parentValue = @walkObjectKeypath obj, parentKeypath
 
     unless callbacks[ keypath ]?
       callbacks[ keypath ] = []
 
-    if parentValue and typeof parentValue is 'object'
-      if parentValue.hasOwnProperty key
-        delete parentValue[ key ]
+    if parentValue and typeof parentValue is 'object' and parentValue.hasOwnProperty key
+      #delete parentValue[ key ]
 
       Object.defineProperty parentValue, key,
         enumerable: true
@@ -37,14 +36,14 @@ class Observer
       unless callback in callbacks[ keypath ]
         callbacks[ keypath ].push callback
 
-      @observeMutations value, obj[@id], key
+      @observeMutations parentValue, obj[@id], key
 
   weakReference: (obj) ->
     unless obj.hasOwnProperty @id
-      id = @counter++
+      id = (@counter += 1)
       Object.defineProperty obj, @id, value: id
 
-    @weakmap[obj[@id]] or= callbacks: {}
+    @weakmap[ obj[ @id ] ] or= callbacks: {}
 
   observeMutations: (obj, ref, keypath) ->
     if Array.isArray obj
@@ -82,12 +81,15 @@ class Observer
     val = obj
 
     for key in keys.reverse()
-      if key is lastKey and value
-        val = val[ key ] = value
-      # else if val?[ key ]
-      else if val[ key ]
+      if key is lastKey
+        if value
+          val = value
+        else if val[key]?
+          val = val[ key ]
+        else
+          val = null
+      else if val[ key ]?
         val = val[ key ]
       else
-        val = null
-
+        val = {}
     val
