@@ -1,23 +1,16 @@
 Rivets.View = class
-  constructor: (@els, @models) ->
+  constructor: (@els, @models, @callbacks = []) ->
     @els = [ @els ] unless (@els instanceof Array)
     @binders = Rivets.binders
     @build()
 
   bindingRegExp: => new RegExp "^cb-"
   buildBinding: (binding, node, type, declaration) =>
-    options = {}
-
     pipes = (pipe.trim() for pipe in declaration.match /((?:'[^']*')*(?:(?:[^\|']+(?:'[^']*')*[^\|']*)+|[^\|]+))|^$/g)
     context = (ctx.trim() for ctx in pipes.shift().split '<')
     keypath = context.shift()
 
-    options.formatters = pipes
-
-    if dependencies = context.shift()
-      options.dependencies = dependencies.split /\s+/
-
-    @bindings.push new Rivets[binding] @, node, type, keypath, options
+    @bindings.push new Rivets[binding] @, node, type, keypath
 
   build: =>
     @bindings = []

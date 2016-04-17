@@ -1,5 +1,5 @@
 class Observer
-  constructor: ->
+  constructor: (@callbacks = []) ->
     @id = '_'
     @counter = 0
     @weakmap = {}
@@ -8,12 +8,11 @@ class Observer
     @obj = obj
     @keypath = keypath
     callbacks = @weakReference(obj).callbacks
-
     value = null
-    parentKeypath = keypath.split '.'
-    key = parentKeypath.pop()
+    keys = keypath.split '.'
+    key = keys.pop()
+    parentKeypath = keys.join '.'
 
-    parentKeypath = parentKeypath.join '.'
     if parentKeypath
       @target = parentValue = @walkObjectKeypath obj, parentKeypath
     else
@@ -21,21 +20,19 @@ class Observer
 
     value = parentValue[ key ] if parentValue
 
-    unless callbacks[ keypath ]?
-      callbacks[ keypath ] = []
-
-    if parentValue and typeof parentValue is 'object' and parentValue.hasOwnProperty key
-      #delete parentValue[ key ]
+    if value
+      unless callbacks[ keypath ]?
+        callbacks[ keypath ] = []
 
       Object.defineProperty parentValue, key,
         enumerable: true
         configurable: true
         get: -> value
         set: (newValue) =>
-          # if newValue isnt value
-          value = newValue
-          @observe obj, keypath, callback
-          cb() for cb in callbacks[ keypath ]
+          if value isnt newValue
+            value = newValue
+            @observe obj, keypath, callback
+            cb() for cb in callbacks[ keypath ]
 
       unless callback in callbacks[ keypath ]
         callbacks[ keypath ].push callback
@@ -47,7 +44,7 @@ class Observer
       id = (@counter += 1)
       Object.defineProperty obj, @id, value: id
 
-    @weakmap[ obj[ @id ] ] or= callbacks: {}
+    @weakmap[ obj[ @id ] ] or= callbacks: @callbacks
 
   observeMutations: (obj, ref, keypath) ->
     if Array.isArray obj

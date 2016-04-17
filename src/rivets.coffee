@@ -3,7 +3,7 @@ Rivets =
   formatters: call: (value, args...) -> value.call @, args...
   iterationAlias: (modelName) -> "%#{modelName}%"
   handler: (instance, event, binding) ->
-    @call binding.view.models, event, event.target, binding.view.models
+    if @ then @call(binding.view.models, event, event.target, binding.view.models) else null
   bind: (el, models = {}, options = {}) ->
     view = new Rivets.View(el, models, options)
     view.bind()
