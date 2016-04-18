@@ -17,7 +17,7 @@ Observer = Rivets.Observer = class
 
     value = parentValue[ key ] if parentValue
 
-    if parentValue and typeof parentValue is 'object' and parentValue.hasOwnProperty key
+    if parentValue and typeof parentValue is 'object'
       unless callbacks[ keypath ]?
         callbacks[ keypath ] = []
 
