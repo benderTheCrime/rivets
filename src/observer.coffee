@@ -1,4 +1,4 @@
-class Observer
+Observer = Rivets.Observer = class
   constructor: (@callbacks = []) ->
     @id = '_'
     @counter = 0
@@ -13,14 +13,11 @@ class Observer
     key = keys.pop()
     parentKeypath = keys.join '.'
 
-    if parentKeypath
-      @target = parentValue = @walkObjectKeypath obj, parentKeypath
-    else
-      @target = parentValue = obj
+    @target = parentValue = if parentKeypath then @walkObjectKeypath(obj, parentKeypath) else obj
 
     value = parentValue[ key ] if parentValue
 
-    if value
+    if parentValue and typeof parentValue is 'object' and parentValue.hasOwnProperty key
       unless callbacks[ keypath ]?
         callbacks[ keypath ] = []
 
@@ -94,4 +91,5 @@ class Observer
           val = val[ key ]
         else
           val = {}
+
     val

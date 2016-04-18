@@ -39,15 +39,15 @@
     }
   };
 
-  Observer = (function() {
-    function Observer(callbacks1) {
+  Observer = Rivets.Observer = (function() {
+    function _Class(callbacks1) {
       this.callbacks = callbacks1 != null ? callbacks1 : [];
       this.id = '_';
       this.counter = 0;
       this.weakmap = {};
     }
 
-    Observer.prototype.observe = function(obj, keypath, callback) {
+    _Class.prototype.observe = function(obj, keypath, callback) {
       var callbacks, key, keys, parentKeypath, parentValue, value;
       this.obj = obj;
       this.keypath = keypath;
@@ -56,15 +56,11 @@
       keys = keypath.split('.');
       key = keys.pop();
       parentKeypath = keys.join('.');
-      if (parentKeypath) {
-        this.target = parentValue = this.walkObjectKeypath(obj, parentKeypath);
-      } else {
-        this.target = parentValue = obj;
-      }
+      this.target = parentValue = parentKeypath ? this.walkObjectKeypath(obj, parentKeypath) : obj;
       if (parentValue) {
         value = parentValue[key];
       }
-      if (value) {
+      if (parentValue && typeof parentValue === 'object' && parentValue.hasOwnProperty(key)) {
         if (callbacks[keypath] == null) {
           callbacks[keypath] = [];
         }
@@ -98,7 +94,7 @@
       }
     };
 
-    Observer.prototype.weakReference = function(obj) {
+    _Class.prototype.weakReference = function(obj) {
       var base, id, name;
       if (!obj.hasOwnProperty(this.id)) {
         id = (this.counter += 1);
@@ -111,7 +107,7 @@
       });
     };
 
-    Observer.prototype.observeMutations = function(obj, ref, keypath) {
+    _Class.prototype.observeMutations = function(obj, ref, keypath) {
       var base, fn, functions, j, len, map;
       if (Array.isArray(obj)) {
         map = this.weakReference(obj);
@@ -132,7 +128,7 @@
       }
     };
 
-    Observer.prototype.stubFunction = function(obj, fn) {
+    _Class.prototype.stubFunction = function(obj, fn) {
       var map, original, weakmap;
       original = obj[fn];
       map = this.weakReference(obj);
@@ -153,15 +149,15 @@
       };
     };
 
-    Observer.prototype.get = function() {
+    _Class.prototype.get = function() {
       return this.walkObjectKeypath.call(this, this.obj, this.keypath);
     };
 
-    Observer.prototype.set = function(value) {
+    _Class.prototype.set = function(value) {
       return this.walkObjectKeypath.call(this, this.obj, this.keypath, value);
     };
 
-    Observer.prototype.walkObjectKeypath = function(obj, keypath, value) {
+    _Class.prototype.walkObjectKeypath = function(obj, keypath, value) {
       var j, key, keys, lastKey, len, val;
       keys = keypath.split('.');
       lastKey = keys.slice(-1)[0];
@@ -187,7 +183,7 @@
       return val;
     };
 
-    return Observer;
+    return _Class;
 
   })();
 
@@ -907,12 +903,6 @@
       return el.removeAttribute(this.type);
     }
   };
-
-  Rivets.adapters = {
-    '.': new Observer
-  };
-
-  Rivets.adapters['.'].id = '_cb';
 
   module.exports = Rivets;
 
