@@ -4,7 +4,7 @@ Rivets =
   iterationAlias: (modelName) -> "%#{modelName}%"
   handler: (instance, event, binding) ->
     if @ then @call(binding.view.models, event, event.target, binding.view.models) else null
-  bind: (el, models = {}, options = {}) ->
-    view = new Rivets.View(el, models, options)
+  bind: (el, models = {}) ->
+    view = new Rivets.View(el, models)
     view.bind()
     view

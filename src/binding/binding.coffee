@@ -2,8 +2,7 @@ Rivets.Binding = class
   constructor: (@view, @el, @type, @keypath) ->
     @formatters = []
     @formatterObservers = {}
-    @model = undefined
-    @callbacks = @view.callbacks or []
+    @callbacks = @view.callbacks or {}
     @setBinder()
 
   setBinder: =>
@@ -46,9 +45,9 @@ Rivets.Binding = class
           observer.value()
 
       if formatter?.read instanceof Function
-        value = formatter.read.call @model, value, processedArgs...
+        value = formatter.read.call @view.models, value, processedArgs...
       else if formatter instanceof Function
-        value = formatter.call @model, value, processedArgs...
+        value = formatter.call @view.models, value, processedArgs...
 
     value
 
@@ -82,7 +81,6 @@ Rivets.Binding = class
       @value = token.value
     else
       @observer = @observe @view.models, @keypath, @sync
-      @model = @observer.target
 
     @binder.bind?.call @, @el
     @sync()
@@ -93,7 +91,6 @@ Rivets.Binding = class
     delete @observer
 
   update: (models = {}) =>
-    @model = @observer?.target
     @binder.update?.call @, models
 
   getValue: (el) =>

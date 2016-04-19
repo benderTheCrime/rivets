@@ -1,5 +1,8 @@
+r = 0
+
 Rivets.View = class
-  constructor: (@els, @models, @callbacks = []) ->
+  constructor: (@els, @models, @callbacks = {}) ->
+    @id = ++r
     @els = [ @els ] unless (@els instanceof Array)
     @binders = Rivets.binders
     @build()
@@ -34,14 +37,9 @@ Rivets.View = class
       unless block
         parse childNode for childNode in (n for n in node.childNodes)
 
-      undefined
-
     parse el for el in @els
 
-    @bindings.sort (a, b) ->
-      (b.binder?.priority or 0) - (a.binder?.priority or 0)
-
-    undefined
+    @bindings.sort (a, b) -> (b.binder?.priority or 0) - (a.binder?.priority or 0)
 
   traverse: (node) =>
     bindingRegExp = @bindingRegExp()
@@ -72,15 +70,6 @@ Rivets.View = class
     block
 
   select: (fn) => binding for binding in @bindings when fn binding
-
-  bind: =>
-    binding.bind() for binding in @bindings
-    undefined
-
-  unbind: =>
-    binding.unbind() for binding in @bindings
-    undefined
-
-  publish: =>
-    binding.publish() for binding in @select (b) -> b.binder?.publishes
-    undefined
+  bind: => binding.bind() for binding in @bindings
+  unbind: => binding.unbind() for binding in @bindings
+  publish: => binding.publish() for binding in @select (b) -> b.binder?.publishes
