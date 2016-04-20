@@ -1,9 +1,8 @@
 Rivets.Binding = class
-  constructor: (@view, @el, @type, @keypath, @options = {}) ->
-    @formatters = @options.formatters or []
-    @dependencies = []
+  constructor: (@view, @el, @type, @keypath) ->
+    @formatters = []
     @formatterObservers = {}
-    @model = undefined
+    @callbacks = @view.callbacks or {}
     @setBinder()
 
   setBinder: =>
@@ -20,8 +19,8 @@ Rivets.Binding = class
     @binder = {routine: @binder} if @binder instanceof Function
 
   observe: (obj, keypath, callback) =>
-    observer = new Observer
-    observer.observe.apply observer, arguments
+    observer = new Observer @callbacks
+    observer.observe arguments...
     observer
 
   formattedValue: (value) =>
@@ -46,9 +45,9 @@ Rivets.Binding = class
           observer.value()
 
       if formatter?.read instanceof Function
-        value = formatter.read.call @model, value, processedArgs...
+        value = formatter.read.call @view.models, value, processedArgs...
       else if formatter instanceof Function
-        value = formatter.call @model, value, processedArgs...
+        value = formatter.call @view.models, value, processedArgs...
 
     value
 
@@ -58,15 +57,6 @@ Rivets.Binding = class
 
   sync: =>
     @set if @observer
-      if @model isnt @observer.target
-        observer.unobserve() for observer in @dependencies
-        @dependencies = []
-
-        if (@model = @observer.target)? and @options.dependencies?.length
-          for dependency in @options.dependencies
-            observer = @observe @model, dependency, @sync
-            @dependencies.push observer
-
       @observer.get()
     else
       @value
@@ -91,24 +81,16 @@ Rivets.Binding = class
       @value = token.value
     else
       @observer = @observe @view.models, @keypath, @sync
-      @model = @observer.target
 
     @binder.bind?.call @, @el
-
-    if @model? and @options.dependencies?.length
-      for dependency in @options.dependencies
-        observer = @observe @model, dependency, @sync
-        @dependencies.push observer
-
     @sync()
 
   unbind: =>
     @binder.unbind?.call @, @el
     @formatterObservers = {}
-    delete @observer.obj
+    delete @observer
 
   update: (models = {}) =>
-    @model = @observer?.target
     @binder.update?.call @, models
 
   getValue: (el) =>

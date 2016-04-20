@@ -35,16 +35,8 @@ binders.value =
   routine: (el, value) ->
     if el.tagName is 'INPUT' and el.type is 'radio'
       el.setAttribute 'value', value
-    else if window.jQuery?
-      el = jQuery el
-
-      if value?.toString() isnt el.val()?.toString()
-        el.val if value? then value else ''
-    else
-      if el.type is 'select-multiple'
-        o.selected = o.value in value for o in el if value?
-      else if value?.toString() isnt el.value?.toString()
-        el.value = if value? then value else ''
+    else if value?.toString() isnt el.value?.toString()
+      el.value = if value? then value else ''
 
 binders.if =
   block: true
@@ -66,10 +58,8 @@ binders.if =
   routine: (el, value) ->
     if !!value is not @bound
       if value
-        models = {}
-        models[key] = model for key, model of @view.models
 
-        (@nested or= new Rivets.View(el, models, @view.options())).bind()
+        (@nested = new Rivets.View el, @view.models).bind()
         @marker.parentNode.insertBefore el, @marker.nextSibling
         @bound = true
       else
@@ -143,11 +133,8 @@ binders['each-*'] =
         else
           @marker
 
-        options = @view.options()
-        # options.preloadData = true
-
         template = el.cloneNode true
-        view = new Rivets.View(template, data, options)
+        view = new Rivets.View template, data
         view.bind()
         @iterated.push view
 
@@ -178,6 +165,8 @@ binders['class-*'] = (el, value) ->
       "#{el.className} #{@args[0]}"
     else
       elClass.replace(" #{@args[0]} ", ' ').trim()
+
+binders['no-class-*'] = (el, value) -> binders['class-*'].call @, el, not value
 
 binders['*'] = (el, value) ->
   if value?

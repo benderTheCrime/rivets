@@ -1,5 +1,5 @@
-class Observer
-  constructor: ->
+Observer = Rivets.Observer = class
+  constructor: (@callbacks = []) ->
     @id = '_'
     @counter = 0
     @weakmap = {}
@@ -8,40 +8,40 @@ class Observer
     @obj = obj
     @keypath = keypath
     callbacks = @weakReference(obj).callbacks
+    value = null
+    keys = keypath.split '.'
+    key = keys.pop()
+    parentKeypath = keys.join '.'
 
-    value = @walkObjectKeypath obj, keypath
+    @target = parentValue = if parentKeypath then @walkObjectKeypath(obj, parentKeypath) else obj
 
-    parentKeypath = keypath.split '.'
-    key = parentKeypath.pop()
+    value = parentValue[ key ] if parentValue
 
-    parentKeypath = parentKeypath.join '.'
-    parentValue = @walkObjectKeypath obj, parentKeypath
+    if parentValue and typeof parentValue is 'object'
+      unless callbacks[ keypath ]?
+        callbacks[ keypath ] = []
 
-    unless callbacks[ keypath ]?
-      callbacks[ keypath ] = []
+      Object.defineProperty parentValue, key,
+        enumerable: true
+        configurable: true
+        get: -> value
+        set: (newValue) =>
+          if value isnt newValue
+            value = newValue
+            @observe obj, keypath, callback
+            cb() for cb in callbacks[ keypath ]
 
-    delete parentValue[ key ];
-    Object.defineProperty parentValue, key,
-      enumerable: true
-      configurable: true
-      get: -> value
-      set: (newValue) =>
-        if newValue isnt value
-          value = newValue
-          @observe obj, keypath, callback
-          cb() for cb in callbacks[ keypath ]
+      unless callback in callbacks[ keypath ]
+        callbacks[ keypath ].push callback
 
-    unless callback in callbacks[ keypath ]
-      callbacks[ keypath ].push callback
-
-    @observeMutations value, obj[@id], key
+      @observeMutations parentValue, obj[@id], key
 
   weakReference: (obj) ->
     unless obj.hasOwnProperty @id
-      id = @counter++
+      id = (@counter += 1)
       Object.defineProperty obj, @id, value: id
 
-    @weakmap[obj[@id]] or= callbacks: {}
+    @weakmap[ obj[ @id ] ] or= callbacks: @callbacks
 
   observeMutations: (obj, ref, keypath) ->
     if Array.isArray obj
@@ -75,14 +75,21 @@ class Observer
 
   walkObjectKeypath: (obj, keypath, value) ->
     keys = keypath.split '.'
-    lastKey = keys.reverse()[ 0 ]
+    lastKey = keys.slice(-1)[ 0 ]
     val = obj
 
-    for key in keys.reverse()
-      if key is lastKey and value
-        val = val[ key ] = value
-      else if val[ key ]?
-        val = val[ key ]
-      else null
+    if keys.length
+      for key in keys
+        if key is lastKey
+          if value
+            val = val[ key ] = value
+          else if val[key]?
+            val = val[ key ]
+          else
+            val = null
+        else if val[ key ]?
+          val = val[ key ]
+        else
+          val = {}
 
     val
