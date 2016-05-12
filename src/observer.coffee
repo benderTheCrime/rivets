@@ -32,14 +32,11 @@ Observer = Rivets.Observer = class
               if key.replace(keypath, '').length <= key.length
                 for cb in callbacks[ key ]
                   @observe @obj, key, callback
-                  @observeMutations value, @obj[ @id ], key
                   cb()
 
       @observeMutations parentValue, @obj[ @id ], key
     else
       @observe @obj, parentKeypath
-
-    undefined
 
   weakReference: (obj) ->
     unless obj.hasOwnProperty @id
