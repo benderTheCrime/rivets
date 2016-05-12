@@ -46,6 +46,11 @@
 
     _Class.prototype.observe = function(obj, keypath, callback) {
       var callbacks, key, keys, parentKeypath, parentValue, value;
+      if (callback == null) {
+        callback = function() {
+          return void 0;
+        };
+      }
       this.obj = obj;
       this.keypath = keypath;
       callbacks = this.weakReference(obj).callbacks;
@@ -53,14 +58,12 @@
       keys = keypath.split('.');
       key = keys.pop();
       parentKeypath = keys.join('.');
-      this.target = parentValue = parentKeypath ? this.walkObjectKeypath(obj, parentKeypath) : obj;
-      if (parentValue) {
-        value = parentValue[key];
+      parentValue = this.walkObjectKeypath(this.obj, parentKeypath);
+      if (indexOf.call((callbacks[keypath] != null ? callbacks[keypath] : callbacks[keypath] = []), callback) < 0) {
+        callbacks[keypath].push(callback);
       }
       if (parentValue && typeof parentValue === 'object') {
-        if (callbacks[keypath] == null) {
-          callbacks[keypath] = [];
-        }
+        value = parentValue[key];
         Object.defineProperty(parentValue, key, {
           enumerable: true,
           configurable: true,
@@ -69,26 +72,39 @@
           },
           set: (function(_this) {
             return function(newValue) {
-              var cb, j, len, ref1, results;
+              var _, cb, results;
               if (value !== newValue) {
                 value = newValue;
-                _this.observe(obj, keypath, callback);
-                ref1 = callbacks[keypath];
                 results = [];
-                for (j = 0, len = ref1.length; j < len; j++) {
-                  cb = ref1[j];
-                  results.push(cb());
+                for (key in callbacks) {
+                  _ = callbacks[key];
+                  if (key.replace(keypath, '').length <= key.length) {
+                    results.push((function() {
+                      var j, len, ref1, results1;
+                      ref1 = callbacks[key];
+                      results1 = [];
+                      for (j = 0, len = ref1.length; j < len; j++) {
+                        cb = ref1[j];
+                        this.observe(this.obj, key, callback);
+                        this.observeMutations(value, this.obj[this.id], key);
+                        results1.push(cb());
+                      }
+                      return results1;
+                    }).call(_this));
+                  } else {
+                    results.push(void 0);
+                  }
                 }
                 return results;
               }
             };
           })(this)
         });
-        if (indexOf.call(callbacks[keypath], callback) < 0) {
-          callbacks[keypath].push(callback);
-        }
-        return this.observeMutations(parentValue, obj[this.id], key);
+        this.observeMutations(parentValue, this.obj[this.id], key);
+      } else {
+        this.observe(this.obj, parentKeypath);
       }
+      return void 0;
     };
 
     _Class.prototype.weakReference = function(obj) {
@@ -156,24 +172,29 @@
 
     _Class.prototype.walkObjectKeypath = function(obj, keypath, value) {
       var j, key, keys, lastKey, len, val;
-      keys = keypath.split('.');
-      lastKey = keys.slice(-1)[0];
+      if (obj == null) {
+        obj = {};
+      }
       val = obj;
-      if (keys.length) {
-        for (j = 0, len = keys.length; j < len; j++) {
-          key = keys[j];
-          if (key === lastKey) {
-            if (value) {
-              val = val[key] = value;
+      if (keypath) {
+        keys = keypath.split('.');
+        lastKey = keys.slice(-1)[0];
+        if (keys.length) {
+          for (j = 0, len = keys.length; j < len; j++) {
+            key = keys[j];
+            if (key === lastKey) {
+              if (value) {
+                val = val[key] = value;
+              } else if (val[key] != null) {
+                val = val[key];
+              } else {
+                val = null;
+              }
             } else if (val[key] != null) {
               val = val[key];
             } else {
-              val = null;
+              val = {};
             }
-          } else if (val[key] != null) {
-            val = val[key];
-          } else {
-            val = {};
           }
         }
       }
