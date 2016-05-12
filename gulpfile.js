@@ -1,9 +1,11 @@
-import gulp from 'gulp';
-import coffee from 'gulp-coffee';
-import util from 'gulp-util';
-import concat from 'gulp-concat';
-import uglify from 'gulp-uglify';
-import rename from 'gulp-rename';
+'use strict';
+
+const gulp = require('gulp');
+const coffee = require('gulp-coffee');
+const util = require('gulp-util');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
 
 const SRC = [
     'src/rivets.coffee',
