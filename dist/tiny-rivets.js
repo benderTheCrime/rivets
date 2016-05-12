@@ -1,5 +1,5 @@
 (function() {
-  var Observer, Rivets, binders, r,
+  var Observer, Rivets, binders,
     slice = [].slice,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -203,8 +203,6 @@
 
   })();
 
-  r = 0;
-
   Rivets.View = (function() {
     function _Class(els, models1, callbacks1) {
       this.els = els;
@@ -218,7 +216,6 @@
       this.build = bind(this.build, this);
       this.buildBinding = bind(this.buildBinding, this);
       this.bindingRegExp = bind(this.bindingRegExp, this);
-      this.id = ++r;
       if (!(this.els instanceof Array)) {
         this.els = [this.els];
       }
