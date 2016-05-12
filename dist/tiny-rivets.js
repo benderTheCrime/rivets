@@ -86,7 +86,6 @@
                       for (j = 0, len = ref1.length; j < len; j++) {
                         cb = ref1[j];
                         this.observe(this.obj, key, callback);
-                        this.observeMutations(value, this.obj[this.id], key);
                         results1.push(cb());
                       }
                       return results1;
@@ -100,11 +99,10 @@
             };
           })(this)
         });
-        this.observeMutations(parentValue, this.obj[this.id], key);
+        return this.observeMutations(parentValue, this.obj[this.id], key);
       } else {
-        this.observe(this.obj, parentKeypath);
+        return this.observe(this.obj, parentKeypath);
       }
-      return void 0;
     };
 
     _Class.prototype.weakReference = function(obj) {
