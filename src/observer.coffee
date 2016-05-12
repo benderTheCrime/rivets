@@ -4,7 +4,7 @@ Observer = Rivets.Observer = class
     @counter = 0
     @weakmap = {}
 
-  observe: (obj, keypath, callback) ->
+  observe: (obj, keypath, callback = () -> undefined) ->
     @obj = obj
     @keypath = keypath
     callbacks = @weakReference(obj).callbacks
@@ -12,14 +12,13 @@ Observer = Rivets.Observer = class
     keys = keypath.split '.'
     key = keys.pop()
     parentKeypath = keys.join '.'
+    parentValue = @walkObjectKeypath @obj, parentKeypath
 
-    @target = parentValue = if parentKeypath then @walkObjectKeypath(obj, parentKeypath) else obj
-
-    value = parentValue[ key ] if parentValue
+    unless callback in (callbacks[ keypath ] ?= [])
+      callbacks[ keypath ].push callback
 
     if parentValue and typeof parentValue is 'object'
-      unless callbacks[ keypath ]?
-        callbacks[ keypath ] = []
+      value = parentValue[ key ]
 
       Object.defineProperty parentValue, key,
         enumerable: true
@@ -28,13 +27,16 @@ Observer = Rivets.Observer = class
         set: (newValue) =>
           if value isnt newValue
             value = newValue
-            @observe obj, keypath, callback
-            cb() for cb in callbacks[ keypath ]
 
-      unless callback in callbacks[ keypath ]
-        callbacks[ keypath ].push callback
+            for key, _ of callbacks
+              if key.replace(keypath, '').length <= key.length
+                for cb in callbacks[ key ]
+                  @observe @obj, key, callback
+                  cb()
 
-      @observeMutations parentValue, obj[@id], key
+      @observeMutations parentValue, @obj[ @id ], key
+    else
+      @observe @obj, parentKeypath
 
   weakReference: (obj) ->
     unless obj.hasOwnProperty @id
@@ -73,23 +75,24 @@ Observer = Rivets.Observer = class
   get: () -> @walkObjectKeypath.call @, @obj, @keypath
   set: (value) -> @walkObjectKeypath.call @, @obj, @keypath, value
 
-  walkObjectKeypath: (obj, keypath, value) ->
-    keys = keypath.split '.'
-    lastKey = keys.slice(-1)[ 0 ]
+  walkObjectKeypath: (obj = {}, keypath, value) ->
     val = obj
 
-    if keys.length
-      for key in keys
-        if key is lastKey
-          if value
-            val = val[ key ] = value
-          else if val[key]?
+    if keypath
+      keys = keypath.split '.'
+      lastKey = keys.slice(-1)[ 0 ]
+
+      if keys.length
+        for key in keys
+          if key is lastKey
+            if value
+              val = val[ key ] = value
+            else if val[key]?
+              val = val[ key ]
+            else
+              val = null
+          else if val[ key ]?
             val = val[ key ]
           else
-            val = null
-        else if val[ key ]?
-          val = val[ key ]
-        else
-          val = {}
-
+            val = {}
     val
