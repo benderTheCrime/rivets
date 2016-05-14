@@ -1,6 +1,9 @@
 Observer = Rivets.Observer = class
-  constructor: (@obj, @keypath, @callbacks = [], @id = '_') -> @
+  constructor: (@callbacks = [], @id = '_') -> @
   observe: (obj, keypath, callback = () -> undefined) ->
+    @obj = @obj || obj
+    @keypath = @keypath || keypath
+
     value = null
     keys = keypath.split '.'
     key = keys.pop()
