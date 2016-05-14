@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+#### [1.2.3] - 2016-05-12
+##### Fixed
+- Fixed an issue preventing observance of undefined deep properties (more than
+two levels)
+- Fixed an issue causing conflicting listener values set based on Observer
+targets
+
 #### [1.2.2] - 2016-05-12
 ##### Fixed
 - Fixed an issue preventing observance of undefined deep properties

@@ -1,21 +1,14 @@
 Observer = Rivets.Observer = class
-  constructor: (@callbacks = []) ->
-    @id = '_'
-    @counter = 0
-    @weakmap = {}
-
+  constructor: (@obj, @keypath, @callbacks = [], @id = '_') -> @
   observe: (obj, keypath, callback = () -> undefined) ->
-    @obj = obj
-    @keypath = keypath
-    callbacks = @weakReference(obj).callbacks
     value = null
     keys = keypath.split '.'
     key = keys.pop()
     parentKeypath = keys.join '.'
-    parentValue = @walkObjectKeypath @obj, parentKeypath
+    parentValue = @walkObjectKeypath obj, parentKeypath
 
-    unless callback in (callbacks[ keypath ] ?= [])
-      callbacks[ keypath ].push callback
+    unless callback in (@callbacks[ keypath ] ?= [])
+      @callbacks[ keypath ].push callback
 
     if parentValue and typeof parentValue is 'object'
       value = parentValue[ key ]
@@ -26,51 +19,28 @@ Observer = Rivets.Observer = class
         get: -> value
         set: (newValue) =>
           if value isnt newValue
+            debugger;
             value = newValue
 
-            for key, _ of callbacks
+            for key, _ of @callbacks
               if key.replace(keypath, '').length <= key.length
-                for cb in callbacks[ key ]
-                  @observe @obj, key, callback
+                for cb in @callbacks[ key ]
+                  @observe obj, key, callback
                   cb()
 
-      @observeMutations parentValue, @obj[ @id ], key
+      @observeMutations value, keypath
     else
-      @observe @obj, parentKeypath
+      @observe obj, parentKeypath
 
-  weakReference: (obj) ->
-    unless obj.hasOwnProperty @id
-      id = (@counter += 1)
-      Object.defineProperty obj, @id, value: id
-
-    @weakmap[ obj[ @id ] ] or= callbacks: @callbacks
-
-  observeMutations: (obj, ref, keypath) ->
+  observeMutations: (obj, k) ->
     if Array.isArray obj
-      map = @weakReference obj
+      for fn in [ 'push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice' ]
+        obj[ fn ] = ->
+          response = original.apply obj, arguments
 
-      unless map.pointers?
-        map.pointers = {}
-        functions = ['push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice']
-        @stubFunction obj, fn for fn in functions
+          cb() for cb in @callbacks[ k ]
 
-      map.pointers[ref] ?= []
-
-      unless keypath in map.pointers[ref]
-        map.pointers[ref].push keypath
-
-  stubFunction: (obj, fn) ->
-    original = obj[fn]
-    map = @weakReference obj
-    weakmap = @weakmap
-
-    obj[fn] = ->
-      response = original.apply obj, arguments
-
-      for r, k of map.pointers
-        callback() for callback in weakmap[r]?.callbacks[k] ? []
-
-      response
+          response
 
   get: () -> @walkObjectKeypath.call @, @obj, @keypath
   set: (value) -> @walkObjectKeypath.call @, @obj, @keypath, value

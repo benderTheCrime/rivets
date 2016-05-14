@@ -19,7 +19,7 @@ Rivets.Binding = class
     @binder = {routine: @binder} if @binder instanceof Function
 
   observe: (obj, keypath, callback) =>
-    observer = new Observer @callbacks
+    observer = new Observer obj, keypath, @callbacks
     observer.observe arguments...
     observer
 
