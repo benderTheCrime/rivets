@@ -19,11 +19,7 @@
       return "%" + modelName + "%";
     },
     handler: function(instance, event, binding) {
-      if (this) {
-        return this.call(binding.view.models, event, event.target, binding.view.models);
-      } else {
-        return null;
-      }
+      return this.call(binding.view.models, event, event.target, binding.view.models);
     },
     bind: function(el, models) {
       var view;
@@ -37,9 +33,8 @@
   };
 
   Observer = Rivets.Observer = (function() {
-    function _Class(callbacks, id1) {
+    function _Class(callbacks) {
       this.callbacks = callbacks != null ? callbacks : [];
-      this.id = id1 != null ? id1 : '_';
       this;
     }
 
@@ -77,7 +72,7 @@
                 results = [];
                 for (key in ref) {
                   _ = ref[key];
-                  if (key.replace(keypath, '').length <= key.length) {
+                  if (key.indexOf(keypath) > -1) {
                     results.push((function() {
                       var j, len, ref1, results1;
                       ref1 = this.callbacks[key];
@@ -549,6 +544,7 @@
     };
 
     _Class.prototype.publish = function() {
+      debugger;
       var args, formatter, id, j, len, ref, ref1, ref2, value;
       if (this.observer) {
         value = this.getValue(this.el);
@@ -561,6 +557,7 @@
             value = (ref2 = this.view.formatters[id]).publish.apply(ref2, [value].concat(slice.call(args)));
           }
         }
+        debugger;
         return this.observer.set(value);
       }
     };

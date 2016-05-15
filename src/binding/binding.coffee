@@ -62,6 +62,7 @@ Rivets.Binding = class
       @value
 
   publish: =>
+    debugger
     if @observer
       value = @getValue @el
 
@@ -72,6 +73,7 @@ Rivets.Binding = class
         if @view.formatters[id]?.publish
           value = @view.formatters[id].publish value, args...
 
+      debugger
       @observer.set value
 
   bind: =>
