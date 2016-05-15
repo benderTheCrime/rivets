@@ -22,7 +22,6 @@ Observer = Rivets.Observer = class
         get: -> value
         set: (newValue) =>
           if value isnt newValue
-            debugger;
             value = newValue
 
             for key, _ of @callbacks

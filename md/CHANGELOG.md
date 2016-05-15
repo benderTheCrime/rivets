@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+#### [1.2.4] - 2016-05-14
+##### Changed
+- Modified the arguments to the Observer class
+
 #### [1.2.3] - 2016-05-12
 ##### Fixed
 - Fixed an issue preventing observance of undefined deep properties (more than

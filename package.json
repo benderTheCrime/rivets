@@ -1,8 +1,7 @@
 {
   "name": "tiny-rivets",
   "description": "A tiny RivetsJS fork",
-  "version": "1.2.3",
-  "author": "Michael Richards",
+  "version": "1.2.4",
   "main": "dist/tiny-rivets.js",
   "private": false,
   "engine": {
@@ -18,7 +17,6 @@
       "url": "http://joegroseclose.com"
     }
   ],
-  "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
