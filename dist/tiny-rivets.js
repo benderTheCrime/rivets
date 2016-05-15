@@ -19,7 +19,9 @@
       return "%" + modelName + "%";
     },
     handler: function(instance, event, binding) {
-      return this.call(binding.view.models, event, event.target, binding.view.models);
+      if (this) {
+        return this.call(binding.view.models, event, event.target, binding.view.models);
+      }
     },
     bind: function(el, models) {
       var view;
@@ -544,7 +546,6 @@
     };
 
     _Class.prototype.publish = function() {
-      debugger;
       var args, formatter, id, j, len, ref, ref1, ref2, value;
       if (this.observer) {
         value = this.getValue(this.el);
@@ -557,7 +558,6 @@
             value = (ref2 = this.view.formatters[id]).publish.apply(ref2, [value].concat(slice.call(args)));
           }
         }
-        debugger;
         return this.observer.set(value);
       }
     };
