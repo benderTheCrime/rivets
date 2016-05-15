@@ -1,5 +1,5 @@
 Observer = Rivets.Observer = class
-  constructor: (@callbacks = [], @id = '_') -> @
+  constructor: (@callbacks = []) -> @
   observe: (obj, keypath, callback = () -> undefined) ->
     @obj = @obj || obj
     @keypath = @keypath || keypath
@@ -25,7 +25,7 @@ Observer = Rivets.Observer = class
             value = newValue
 
             for key, _ of @callbacks
-              if key.replace(keypath, '').length <= key.length
+              if key.indexOf(keypath) > -1
                 for cb in @callbacks[ key ]
                   @observe obj, key, callback
                   cb()

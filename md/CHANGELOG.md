@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+#### [1.2.5] - 2016-05-15
+##### Changed
+- Check for Observer setter callback listeners should not depend on keypath
+length but on `indexOf`
+
 #### [1.2.4] - 2016-05-14
 ##### Changed
 - Modified the arguments to the Observer class
