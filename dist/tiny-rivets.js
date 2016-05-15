@@ -37,9 +37,7 @@
   };
 
   Observer = Rivets.Observer = (function() {
-    function _Class(obj1, keypath1, callbacks, id1) {
-      this.obj = obj1;
-      this.keypath = keypath1;
+    function _Class(callbacks, id1) {
       this.callbacks = callbacks != null ? callbacks : [];
       this.id = id1 != null ? id1 : '_';
       this;
@@ -52,6 +50,8 @@
           return void 0;
         };
       }
+      this.obj = this.obj || obj;
+      this.keypath = this.keypath || keypath;
       value = null;
       keys = keypath.split('.');
       key = keys.pop();
@@ -72,7 +72,6 @@
             return function(newValue) {
               var _, cb, ref, results;
               if (value !== newValue) {
-                debugger;
                 value = newValue;
                 ref = _this.callbacks;
                 results = [];
@@ -496,7 +495,7 @@
 
     _Class.prototype.observe = function(obj, keypath, callback) {
       var observer;
-      observer = new Observer(obj, keypath, this.callbacks);
+      observer = new Observer(this.callbacks);
       observer.observe.apply(observer, arguments);
       return observer;
     };
