@@ -62,7 +62,6 @@ Rivets.Binding = class
       @value
 
   publish: =>
-    debugger
     if @observer
       value = @getValue @el
 
