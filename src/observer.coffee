@@ -57,7 +57,7 @@ Observer = Rivets.Observer = class
       if keys.length
         for key in keys
           if key is lastKey
-            if value
+            if value or value is false or value is ''
               val = val[ key ] = value
             else if val[key]?
               val = val[ key ]
