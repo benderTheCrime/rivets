@@ -24,8 +24,11 @@ binders.value =
   priority: 3000
 
   bind: (el) ->
-    unless el.tagName is 'INPUT' and el.type is 'radio'
-      @event = if el.tagName is 'SELECT' then 'change' else 'input'
+    tagName = el.tagName
+    type = el.type
+
+    unless tagName is 'INPUT' and type is 'radio'
+      @event = if tagName is 'SELECT' or type is 'checkbox' then 'change' else 'input'
       el.addEventListener @event, @publish
 
   unbind: (el) ->

@@ -144,7 +144,7 @@
           for (j = 0, len = keys.length; j < len; j++) {
             key = keys[j];
             if (key === lastKey) {
-              if (value) {
+              if (value || value === false || value === '') {
                 val = val[key] = value;
               } else if (val[key] != null) {
                 val = val[key];
@@ -670,8 +670,11 @@
     publishes: true,
     priority: 3000,
     bind: function(el) {
-      if (!(el.tagName === 'INPUT' && el.type === 'radio')) {
-        this.event = el.tagName === 'SELECT' ? 'change' : 'input';
+      var tagName, type;
+      tagName = el.tagName;
+      type = el.type;
+      if (!(tagName === 'INPUT' && type === 'radio')) {
+        this.event = tagName === 'SELECT' || type === 'checkbox' ? 'change' : 'input';
         return el.addEventListener(this.event, this.publish);
       }
     },

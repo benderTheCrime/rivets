@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+#### [1.2.6] - 2016-05-16
+##### Changed
+- Checkboxes bound with the `cb-value` binder now bind change events as opposed
+to input events
+
 #### [1.2.5] - 2016-05-15
 ##### Changed
 - Check for Observer setter callback listeners should not depend on keypath
