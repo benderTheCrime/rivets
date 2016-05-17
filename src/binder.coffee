@@ -35,11 +35,19 @@ binders.value =
     unless el.tagName is 'INPUT' and el.type is 'radio'
       el.removeEventListener @event, @publish
 
-  routine: (el, value) ->
-    if el.tagName is 'INPUT' and el.type is 'radio'
-      el.setAttribute 'value', value
-    else if value?.toString() isnt el.value?.toString()
-      el.value = if value? then value else ''
+  routine: (el, value = '') ->
+    tagName = el.tagName
+    type = el.type
+
+    if tagName is 'INPUT'
+      if type is 'radio'
+        el.setAttribute 'value', value
+      else if type is 'checkox'
+        el.checked = value
+      else
+        el.value = value
+    else
+      el.value = value
 
 binders.if =
   block: true

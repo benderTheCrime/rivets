@@ -34,13 +34,14 @@ Observer = Rivets.Observer = class
     else
       @observe obj, parentKeypath
 
-  observeMutations: (obj, k) ->
+  observeMutations: (obj, keypath) ->
     if Array.isArray obj
       for fn in [ 'push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice' ]
-        obj[ fn ] = ->
+        original = obj[ fn ]
+        obj[ fn ] = =>
           response = original.apply obj, arguments
 
-          cb() for cb in @callbacks[ k ]
+          cb() for cb in @callbacks[ keypath ]
 
           response
 
