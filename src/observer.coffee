@@ -38,12 +38,13 @@ Observer = Rivets.Observer = class
     if Array.isArray obj
       for fn in [ 'push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice' ]
         original = obj[ fn ]
-        obj[ fn ] = =>
+        obj[ fn ] = (original) ->
           response = original.apply obj, arguments
 
           cb() for cb in @callbacks[ keypath ]
 
           response
+        obj[ fn ].bind @, original
 
   get: () -> @walkObjectKeypath.call @, @obj, @keypath
   set: (value) -> @walkObjectKeypath.call @, @obj, @keypath, value

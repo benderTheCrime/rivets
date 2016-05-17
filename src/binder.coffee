@@ -42,7 +42,7 @@ binders.value =
     if tagName is 'INPUT'
       if type is 'radio'
         el.setAttribute 'value', value
-      else if type is 'checkox'
+      else if type is 'checkbox'
         el.checked = value
       else
         el.value = value
