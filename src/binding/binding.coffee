@@ -90,8 +90,7 @@ Rivets.Binding = class
     @formatterObservers = {}
     delete @observer
 
-  update: (models = {}) =>
-    @binder.update?.call @, models
+  update: (models = {}) => @binder.update?.call @, models
 
   getValue: (el) =>
     if @binder and @binder.getValue?

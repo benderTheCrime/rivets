@@ -1,10 +1,9 @@
 Observer = Rivets.Observer = class
-  constructor: (@callbacks = []) -> @
+  constructor: (@callbacks = {}) -> @
   observe: (obj, keypath, callback = () -> undefined) ->
     @obj = @obj || obj
     @keypath = @keypath || keypath
 
-    value = null
     keys = keypath.split '.'
     key = keys.pop()
     parentKeypath = keys.join '.'
@@ -30,19 +29,16 @@ Observer = Rivets.Observer = class
                   @observe obj, key, callback
                   cb()
 
-      @observeMutations value, keypath
+      if Array.isArray value
+        for fn in [ 'push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice' ]
+          ((original) =>
+            value[ fn ] = =>
+              response = original.apply value, arguments
+              cb() for cb in @callbacks[ keypath ]
+              response
+           ) value[ fn ]
     else
       @observe obj, parentKeypath
-
-  observeMutations: (obj, k) ->
-    if Array.isArray obj
-      for fn in [ 'push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice' ]
-        obj[ fn ] = ->
-          response = original.apply obj, arguments
-
-          cb() for cb in @callbacks[ k ]
-
-          response
 
   get: () -> @walkObjectKeypath.call @, @obj, @keypath
   set: (value) -> @walkObjectKeypath.call @, @obj, @keypath, value
