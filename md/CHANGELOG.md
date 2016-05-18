@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### [1.3.0] - 2016-05-18
+#### Added/Fixed
+- Created a system for adding new bindings and re-added checked
+- Fixed an issue where checkbox inputs were not properly setting the "checked"
+property when used in tandem with the value binder
+- Fixed an issue preventing observed arrays from consuming callbacks when
+mutated
+
 #### [1.2.6] - 2016-05-16
 ##### Changed
 - Checkboxes bound with the `cb-value` binder now bind change events as opposed

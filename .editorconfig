@@ -7,5 +7,5 @@ trim_trailing_whitespace = true
 insert_final_newline = false
 indent_style = space
 
-[*.{json,coffee}]
+[*.coffee]
 indent_size = 2
