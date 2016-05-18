@@ -15,20 +15,27 @@ const SRC = [
     'src/parser/text-template-parser.coffee',
     'src/binding/binding.coffee',
     'src/binding/text-binding.coffee',
-    'src/binder.coffee',
+    'src/binder/binder.coffee',
     'src/export.coffee'
 ];
 
 gulp.task('build', function() {
+    gulp.src('src/binder/checked.coffee')
+        .pipe(rename({ main: 'checked', ext: '.js' }))
+        .pipe(coffee().on('error', util.log))
+        .pipe(gulp.dest('dist/binder'));
+
     return gulp.src(SRC)
         .pipe(concat('tiny-rivets.js'))
         .pipe(coffee().on('error', util.log))
         .pipe(gulp.dest('dist'));
 });
-gulp.task('minify', function() {
-    return gulp.src('./dist/tiny-rivets.js')
+gulp.task('minify', [ 'build' ], function() {
+    return gulp.src([ './dist/**/*.js', '!./dist/**/*.min.js' ])
         .pipe(uglify())
         .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest('dist'));
 });
+
+gulp.task('default', [ 'minify' ]);
 gulp.task('watch', [ 'build' ], () => gulp.watch('./src/**/*.coffee', [ 'build' ]));

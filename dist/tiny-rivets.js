@@ -699,9 +699,7 @@
     },
     routine: function(el, value) {
       var tagName, type;
-      if (value == null) {
-        value = '';
-      }
+      value = value || '';
       tagName = el.tagName;
       type = el.type;
       if (tagName === 'INPUT') {
