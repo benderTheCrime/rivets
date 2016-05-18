@@ -15,7 +15,6 @@ binders.html = (el, value) ->
 
 binders.show = (el, value) -> el.style.display = if value then '' else 'none'
 binders.hide = (el, value) -> el.style.display = if value then 'none' else ''
-
 binders.enabled = (el, value) -> el.disabled = !value
 binders.disabled = (el, value) -> el.disabled = !!value
 
@@ -131,9 +130,9 @@ binders['each-*'] =
         @marker.parentNode.removeChild view.els[0]
 
     for model, index in collection
-      data = {index}
-      data[Rivets.iterationAlias modelName] = index
-      data[modelName] = model
+      data = { index }
+      data[ "%#{modelName}%" ] = index
+      data[ modelName ] = model
 
       if not @iterated[index]?
         for key, model of @view.models

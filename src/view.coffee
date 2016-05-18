@@ -10,7 +10,7 @@ Rivets.View = class
     context = (ctx.trim() for ctx in pipes.shift().split '<')
     keypath = context.shift()
 
-    @bindings.push new Rivets[binding] @, node, type, keypath
+    @bindings.push new Rivets[ binding ] @, node, type, keypath
 
   build: =>
     @bindings = []
@@ -53,7 +53,7 @@ Rivets.View = class
               if regexp.test type
                 binder = value
 
-        binder or= @binders['*']
+        binder or= @binders[ '*' ]
 
         if binder.block
           block = true
@@ -70,3 +70,7 @@ Rivets.View = class
   bind: => binding.bind() for binding in @bindings
   unbind: => binding.unbind() for binding in @bindings
   publish: => binding.publish() for binding in @select (b) -> b.binder?.publishes
+  update: (models = {}) =>
+    @models[key] = model for key, model of models
+    binding.update? models for binding in @bindings
+    return
