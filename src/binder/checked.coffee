@@ -1,4 +1,4 @@
-module.exports = binders ->
+module.exports = (binders) ->
   binders.checked =
     publishes: true
     priority: 2000

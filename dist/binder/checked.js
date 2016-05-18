@@ -1,5 +1,5 @@
 (function() {
-  module.exports = binders(function() {
+  module.exports = function(binders) {
     binders.checked = {
       publishes: true,
       priority: 2000,
@@ -27,6 +27,6 @@
       }
     };
     return binders;
-  });
+  };
 
 }).call(this);
