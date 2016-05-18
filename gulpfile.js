@@ -20,8 +20,8 @@ const SRC = [
 ];
 
 gulp.task('build', function() {
-    gulp.src('src/binder/checked.coffee')
-        .pipe(rename({ main: 'checked', ext: '.js' }))
+    gulp.src([ './src/binder/**.coffee', '!./src/binder/binder.coffee' ])
+        .pipe(rename({ ext: '.js' }))
         .pipe(coffee().on('error', util.log))
         .pipe(gulp.dest('dist/binder'));
 
