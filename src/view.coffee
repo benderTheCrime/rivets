@@ -1,6 +1,6 @@
 Rivets.View = class
   constructor: (@els, @models, @callbacks = {}) ->
-    @els = [ @els ] unless (@els instanceof Array)
+    @els = [ @els ] unless @els instanceof Array
     @binders = Rivets.binders
     @build()
 

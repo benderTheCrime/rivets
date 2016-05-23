@@ -6,7 +6,7 @@ Rivets.Binding = class
     @setBinder()
 
   setBinder: =>
-    unless @binder = @view.binders[@type]
+    unless @binder = @view.binders[ @type ]
       for identifier, value of @view.binders
         if identifier isnt '*' and identifier.indexOf('*') isnt -1
           regexp = new RegExp "^#{identifier.replace(/\*/g, '.+')}$"
@@ -16,7 +16,7 @@ Rivets.Binding = class
             @args.shift()
 
     @binder or= @view.binders['*']
-    @binder = {routine: @binder} if @binder instanceof Function
+    @binder = { routine: @binder } if @binder instanceof Function
 
   observe: (obj, keypath, callback) =>
     observer = new Observer @callbacks
@@ -52,12 +52,10 @@ Rivets.Binding = class
     value
 
   eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
-
   set: (value) => @binder.routine?.call @, @el, @formattedValue value
-
   sync: => @set if @observer then @observer.get()
-
   publish: =>
+    debugger
     if @observer
       value = @getValue @el
 

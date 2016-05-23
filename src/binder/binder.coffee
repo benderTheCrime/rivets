@@ -8,7 +8,7 @@ binders.text = (el, value) ->
 
 binders.html = (el, value) ->
   return binders.text el, value if typeof value is 'string'
-  el.innerHTML = value if value instanceof HTMLElement
+  el.innerHTML = value.outerHTML if value instanceof HTMLElement
 
 binders.show = (el, value) -> el.style.display = if value then '' else 'none'
 binders.hide = (el, value) -> el.style.display = if value then 'none' else ''
@@ -112,49 +112,41 @@ binders[ 'each-*' ] =
         view.bind()
 
   unbind: (el) -> view.unbind() for view in @iterated if @iterated?
-  routine: (el, collection) ->
+  routine: (el, collection = []) ->
     modelName = @args[ 0 ]
-    collection = collection or []
-
-    if @iterated.length > collection.length
-      for i in Array @iterated.length - collection.length
-        view = @iterated.pop()
-        view.unbind()
-        @marker.parentNode.removeChild view.els[0]
 
     for model, index in collection
-      data = { index }
-      data[ "%#{modelName}%" ] = index
-      data[ modelName ] = model
+      @view.models[ "%#{modelName}%" ] = index
+      @view.models[ modelName ] = model
 
-      if not @iterated[ index ]?
-        for key, model of @view.models
-          data[ key ] ?= model
+      previous = if @iterated.length then @iterated[ @iterated.length - 1 ].els[ 0 ] else @marker
+      template = el.cloneNode true
+      view = new Rivets.View template, @view.models
 
-        previous = if @iterated.length
-          @iterated[ @iterated.length - 1 ].els[0]
-        else
-          @marker
-
-        template = el.cloneNode true
-        view = new Rivets.View template, data
-        view.bind()
+      if @iterated[ index ]
+        @iterated[ index ].unbind()
+        @marker.parentNode.removeChild @iterated[ index ].els[ 0 ]
+        @iterated[ index ] = view
+      else
         @iterated.push view
 
-        @marker.parentNode.insertBefore template, previous.nextSibling
-      else if @iterated[ index ].models[ modelName ] isnt model
-        @iterated[ index ].update data
-
+      view.bind()
+      @marker.parentNode.insertBefore template, previous.nextSibling
     if el.nodeName is 'OPTION'
       for binding in @view.bindings
         if binding.el is @marker.parentNode and binding.type is 'value'
           binding.sync()
 
+    delete @view.models[ "%#{modelName}" ]
+    delete @view.models[ modelName ]
+
+    return
+
   update: (models) ->
     data = {}
 
     for key, model of models
-      data[key] = model unless key is @args[0]
+      data[ key ] = model unless key is @args[ 0 ]
 
     view.update data for view in @iterated
 
