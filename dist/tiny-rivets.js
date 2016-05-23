@@ -697,13 +697,15 @@
     },
     routine: function(el, value) {
       var setValue, tagName, type;
+      if (value == null) {
+        value = '';
+      }
       setValue = function() {
         var ref;
         if ((value != null ? value.toString() : void 0) !== ((ref = el.value) != null ? ref.toString() : void 0)) {
           return el.value = value;
         }
       };
-      value = value || '';
       tagName = el.tagName;
       type = el.type;
       if (tagName === 'INPUT') {

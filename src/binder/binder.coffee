@@ -31,9 +31,8 @@ binders.value =
     unless el.tagName is 'INPUT' and el.type is 'radio'
       el.removeEventListener @event, @publish
 
-  routine: (el, value) ->
+  routine: (el, value = '') ->
     setValue = () -> el.value = value if value?.toString() isnt el.value?.toString()
-    value = value || ''
     tagName = el.tagName
     type = el.type
 
