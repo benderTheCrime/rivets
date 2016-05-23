@@ -112,35 +112,42 @@ binders[ 'each-*' ] =
         view.bind()
 
   unbind: (el) -> view.unbind() for view in @iterated if @iterated?
-  routine: (el, collection = []) ->
+  routine: (el, collection) ->
     modelName = @args[ 0 ]
+    collection = collection or []
+
+    while @iterated.length > collection.length
+      view = @iterated.pop()
+      view.unbind()
+      @marker.parentNode.removeChild view.els[ 0 ]
 
     for model, index in collection
-      @view.models[ "%#{modelName}%" ] = index
-      @view.models[ modelName ] = model
+      data = { index }
+      data[ "%#{modelName}%" ] = index
+      data[ modelName ] = model
 
-      previous = if @iterated.length then @iterated[ @iterated.length - 1 ].els[ 0 ] else @marker
-      template = el.cloneNode true
-      view = new Rivets.View template, @view.models
+      if not @iterated[ index ]
+        for key, model of @view.models
+          data[ key ] ?= model
 
-      if @iterated[ index ]
-        @iterated[ index ].unbind()
-        @marker.parentNode.removeChild @iterated[ index ].els[ 0 ]
-        @iterated[ index ] = view
-      else
+        previous = if @iterated.length
+          @iterated[ @iterated.length - 1 ].els[ 0 ]
+        else
+          @marker
+
+        template = el.cloneNode true
+        view = new Rivets.View template, data
+        view.bind()
         @iterated.push view
 
-      view.bind()
-      @marker.parentNode.insertBefore template, previous.nextSibling
+        @marker.parentNode.insertBefore template, previous.nextSibling
+      else if @iterated[ index ].models[ modelName ] isnt model
+        @iterated[ index ].update data
+
     if el.nodeName is 'OPTION'
       for binding in @view.bindings
         if binding.el is @marker.parentNode and binding.type is 'value'
           binding.sync()
-
-    delete @view.models[ "%#{modelName}" ]
-    delete @view.models[ modelName ]
-
-    return
 
   update: (models) ->
     data = {}

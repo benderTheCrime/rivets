@@ -824,39 +824,52 @@
       }
     },
     routine: function(el, collection) {
-      var binding, i, index, j, len, len1, model, modelName, previous, ref, template, view;
-      if (collection == null) {
-        collection = [];
-      }
+      var binding, data, i, index, j, key, len, len1, model, modelName, previous, ref, ref1, results, template, view;
       modelName = this.args[0];
+      collection = collection || [];
+      while (this.iterated.length > collection.length) {
+        view = this.iterated.pop();
+        view.unbind();
+        this.marker.parentNode.removeChild(view.els[0]);
+      }
       for (index = i = 0, len = collection.length; i < len; index = ++i) {
         model = collection[index];
-        this.view.models["%" + modelName + "%"] = index;
-        this.view.models[modelName] = model;
-        previous = this.iterated.length ? this.iterated[this.iterated.length - 1].els[0] : this.marker;
-        template = el.cloneNode(true);
-        view = new Rivets.View(template, this.view.models);
-        if (this.iterated[index]) {
-          this.iterated[index].unbind();
-          this.marker.parentNode.removeChild(this.iterated[index].els[0]);
-          this.iterated[index] = view;
-        } else {
+        data = {
+          index: index
+        };
+        data["%" + modelName + "%"] = index;
+        data[modelName] = model;
+        if (!this.iterated[index]) {
+          ref = this.view.models;
+          for (key in ref) {
+            model = ref[key];
+            if (data[key] == null) {
+              data[key] = model;
+            }
+          }
+          previous = this.iterated.length ? this.iterated[this.iterated.length - 1].els[0] : this.marker;
+          template = el.cloneNode(true);
+          view = new Rivets.View(template, data);
+          view.bind();
           this.iterated.push(view);
+          this.marker.parentNode.insertBefore(template, previous.nextSibling);
+        } else if (this.iterated[index].models[modelName] !== model) {
+          this.iterated[index].update(data);
         }
-        view.bind();
-        this.marker.parentNode.insertBefore(template, previous.nextSibling);
       }
       if (el.nodeName === 'OPTION') {
-        ref = this.view.bindings;
-        for (j = 0, len1 = ref.length; j < len1; j++) {
-          binding = ref[j];
+        ref1 = this.view.bindings;
+        results = [];
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          binding = ref1[j];
           if (binding.el === this.marker.parentNode && binding.type === 'value') {
-            binding.sync();
+            results.push(binding.sync());
+          } else {
+            results.push(void 0);
           }
         }
+        return results;
       }
-      delete this.view.models["%" + modelName];
-      delete this.view.models[modelName];
     },
     update: function(models) {
       var data, i, key, len, model, ref, results, view;
