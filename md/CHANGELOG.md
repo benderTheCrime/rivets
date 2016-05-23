@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+#### [1.3.1] - 2016-05-23
+##### Fixed
+- Fixed an issue with the `cb-each` binder not updating the view model
+property when used in tandem with the value binder
+- Fixed an issue with reassigning deeply bound undefined model listener's
+parents objects on models
+
 ### [1.3.0] - 2016-05-18
 #### Added/Fixed
 - Created a system for adding new bindings and re-added checked
