@@ -1,44 +1,43 @@
 Observer = Rivets.Observer = class
   constructor: (@callbacks = {}) -> @
-  observe: (obj, keypath, callback = () -> undefined) ->
-    @obj = @obj || obj
-    @keypath = @keypath || keypath
-
+  observe: (@obj, keypath, callback) ->
+    @keypath = keypath unless @keypath
     keys = keypath.split '.'
     key = keys.pop()
+
     parentKeypath = keys.join '.'
-    parentValue = @walkObjectKeypath obj, parentKeypath
+    parentValue = @walkObjectKeypath @obj, parentKeypath
 
-    unless callback in (@callbacks[ keypath ] ?= [])
-      @callbacks[ keypath ].push callback
+    callbacks = @callbacks[ keypath ] ?= []
+    callbacks.push callback if callback
 
-    if parentValue and typeof parentValue is 'object'
-      value = parentValue[ key ]
+    if !parentValue
+      parentValue = @walkObjectKeypath @obj, parentKeypath, {}
+      @observe @obj, parentKeypath
 
-      Object.defineProperty parentValue, key,
-        enumerable: true
-        configurable: true
-        get: -> value
-        set: (newValue) =>
-          if value isnt newValue
-            value = newValue
+    value = parentValue[ key ]
 
-            for key, _ of @callbacks
-              if key.indexOf(keypath) > -1
-                for cb in @callbacks[ key ]
-                  @observe obj, key, callback
-                  cb()
+    Object.defineProperty parentValue, key,
+      enumerable: true
+      configurable: true
+      get: -> value
+      set: (newValue) =>
+        if value isnt newValue
+          value = newValue
+          for key, _ of @callbacks
+            if key.indexOf(keypath) > -1
+              for cb in @callbacks[ key ]
+                @observe @obj, key
+                cb()
 
-      if Array.isArray value
-        for fn in [ 'push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice' ]
-          ((original) =>
-            value[ fn ] = =>
-              response = original.apply value, arguments
-              cb() for cb in @callbacks[ keypath ]
-              response
-           ) value[ fn ]
-    else
-      @observe obj, parentKeypath
+    if Array.isArray value
+      for fn in [ 'push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice' ]
+        ((original) =>
+          value[ fn ] = =>
+            response = original.apply value, arguments
+            cb() for cb in callbacks
+            response
+         ) value[ fn ]
 
   get: () -> @walkObjectKeypath.call @, @obj, @keypath
   set: (value) -> @walkObjectKeypath.call @, @obj, @keypath, value
