@@ -1,17 +1,14 @@
 binders = Rivets.binders = {}
 
-binders.text = (el, value) ->
-  if el.textContent?
-    el.textContent = if value? then value else ''
+binders.text = (el, value = '') ->
+  if el.textContent
+    el.textContent = value
   else
-    el.innerText = if value? then value else ''
+    el.innerText = value
 
 binders.html = (el, value) ->
-  value = value.outerHTML if (value instanceof HTMLElement)
-
-  return this.text(el, value) if typeof value? is 'string'
-
-  el.innerHTML = if value? then value else ''
+  return binders.text el, value if typeof value is 'string'
+  el.innerHTML = value.outerHTML if value instanceof HTMLElement
 
 binders.show = (el, value) -> el.style.display = if value then '' else 'none'
 binders.hide = (el, value) -> el.style.display = if value then 'none' else ''
@@ -34,8 +31,8 @@ binders.value =
     unless el.tagName is 'INPUT' and el.type is 'radio'
       el.removeEventListener @event, @publish
 
-  routine: (el, value) ->
-    value = value || ''
+  routine: (el, value = '') ->
+    setValue = () -> el.value = value if value?.toString() isnt el.value?.toString()
     tagName = el.tagName
     type = el.type
 
@@ -44,10 +41,8 @@ binders.value =
         el.setAttribute 'value', value
       else if type is 'checkbox'
         el.checked = value
-      else
-        el.value = value
-    else
-      el.value = value
+      else setValue()
+    else setValue()
 
 binders.if =
   block: true
@@ -55,7 +50,7 @@ binders.if =
 
   bind: (el) ->
     unless @marker?
-      attr = ['cb', @type].join('-').replace '--', '-'
+      attr = [ 'cb', @type ].join('-').replace '--', '-'
       declaration = el.getAttribute attr
 
       @marker = document.createComment " rivets: #{@type} #{declaration} "
@@ -89,7 +84,7 @@ binders.unless =
   routine: (el, value) -> binders.if.routine.call @, el, not value
   update: (models) -> binders.if.update.call @, models
 
-binders['on-*'] =
+binders[ 'on-*' ] =
   function: true
   priority: 1000
 
@@ -98,13 +93,13 @@ binders['on-*'] =
     el.removeEventListener @args[0], @handler if @handler
     el.addEventListener @args[0], @handler = @eventHandler value
 
-binders['each-*'] =
+binders[ 'each-*' ] =
   block: true
   priority: 4000
 
   bind: (el) ->
     unless @marker?
-      attr = ['cb', @type].join('-').replace '--', '-'
+      attr = [ 'cb', @type ].join('-').replace '--', '-'
       @marker = document.createComment " rivets: #{@type} "
       @iterated = []
 
@@ -114,61 +109,44 @@ binders['each-*'] =
     else
       for view in @iterated
         view.bind()
-    return;
 
-  unbind: (el) ->
-    view.unbind() for view in @iterated if @iterated?
-    return
-
+  unbind: (el) -> view.unbind() for view in @iterated if @iterated?
   routine: (el, collection) ->
-    modelName = @args[0]
+    modelName = @args[ 0 ]
     collection = collection or []
 
-    if @iterated.length > collection.length
-      for i in Array @iterated.length - collection.length
-        view = @iterated.pop()
-        view.unbind()
-        @marker.parentNode.removeChild view.els[0]
+    while @iterated.length > collection.length
+      view = @iterated.pop()
+      view.unbind()
+      @marker.parentNode.removeChild view.els[ 0 ]
 
     for model, index in collection
       data = { index }
       data[ "%#{modelName}%" ] = index
       data[ modelName ] = model
+      data[ key ] ?= model for key, model of @view.models
 
-      if not @iterated[index]?
-        for key, model of @view.models
-          data[key] ?= model
-
-        previous = if @iterated.length
-          @iterated[@iterated.length - 1].els[0]
-        else
-          @marker
-
+      unless @iterated[ index ]
         template = el.cloneNode true
         view = new Rivets.View template, data
-        view.bind()
-        @iterated.push view
+        previous = if @iterated[ index - 1 ] then @iterated[ index - 1 ].els[ 0 ] else @marker
 
         @marker.parentNode.insertBefore template, previous.nextSibling
-      else if @iterated[index].models[modelName] isnt model
-        @iterated[index].update data
+        @iterated.push view
+      else
+        view = new Rivets.View @iterated[ index ].els[ 0 ], data
+
+        @iterated[ index ].unbind()
+        @iterated[ index ] = view
+
+      view.bind()
 
     if el.nodeName is 'OPTION'
       for binding in @view.bindings
         if binding.el is @marker.parentNode and binding.type is 'value'
           binding.sync()
-    return
 
-  update: (models) ->
-    data = {}
-
-    for key, model of models
-      data[key] = model unless key is @args[0]
-
-    view.update data for view in @iterated
-    return
-
-binders['class-*'] = (el, value) ->
+binders[ 'class-*' ] = (el, value) ->
   elClass = " #{el.className} "
 
   if !value is (elClass.indexOf(" #{@args[0]} ") isnt -1)
@@ -177,9 +155,9 @@ binders['class-*'] = (el, value) ->
     else
       elClass.replace(" #{@args[0]} ", ' ').trim()
 
-binders['no-class-*'] = (el, value) -> binders['class-*'].call @, el, not value
+binders[ 'no-class-*' ] = (el, value) -> binders[ 'class-*' ].call @, el, not value
 
-binders['*'] = (el, value) ->
+binders[ '*' ] = (el, value) ->
   if value?
     el.setAttribute @type, value
   else
