@@ -15,7 +15,7 @@ Rivets.Binding = class
             @args = new RegExp("^#{identifier.replace(/\*/g, '(.+)')}$").exec @type
             @args.shift()
 
-    @binder or= @view.binders['*']
+    @binder or= @view.binders[ '*' ]
     @binder = { routine: @binder } if @binder instanceof Function
 
   observe: (obj, keypath, callback) =>
@@ -27,7 +27,7 @@ Rivets.Binding = class
     for formatter, fi in @formatters
       args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
       id = args.shift()
-      formatter = @view.formatters[id]
+      formatter = @view.formatters[ id ]
 
       args = (Rivets.TypeParser.parse(arg) for arg in args)
       processedArgs = []
@@ -36,11 +36,11 @@ Rivets.Binding = class
         processedArgs.push if arg.type is 0
           arg.value
         else
-          @formatterObservers[fi] or= {}
+          @formatterObservers[ fi ] or= {}
 
-          unless observer = @formatterObservers[fi][ai]
+          unless observer = @formatterObservers[ fi ][ ai ]
             observer = @observe @view.models, arg.value, @sync
-            @formatterObservers[fi][ai] = observer
+            @formatterObservers[ fi ][ ai ] = observer
 
           observer.value()
 
@@ -63,8 +63,8 @@ Rivets.Binding = class
         args = formatter.split /\s+/
         id = args.shift()
 
-        if @view.formatters[id]?.publish
-          value = @view.formatters[id].publish value, args...
+        if @view.formatters[ id ]?.publish
+          value = @view.formatters[ id ].publish value, args...
 
       @observer.set value
 
@@ -84,7 +84,7 @@ Rivets.Binding = class
     @formatterObservers = {}
     delete @observer
 
-  update: (models = {}) => @binder.update?.call @, models
+  update: (models = {}) => @binder.update?.call @, models or @sync()
 
   getValue: (el) =>
     if @binder and @binder.getValue?

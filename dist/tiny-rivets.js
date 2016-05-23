@@ -338,6 +338,7 @@
     };
 
     _Class.prototype.publish = function() {
+      debugger;
       var binding, i, len, ref, results;
       ref = this.select(function(b) {
         var ref;
@@ -601,7 +602,7 @@
       if (models == null) {
         models = {};
       }
-      return (ref = this.binder.update) != null ? ref.call(this, models) : void 0;
+      return (ref = this.binder.update) != null ? ref.call(this, models || this.sync()) : void 0;
     };
 
     _Class.prototype.getValue = function(el) {
@@ -644,10 +645,13 @@
   binders = Rivets.binders = {};
 
   binders.text = function(el, value) {
-    if (el.textContent != null) {
-      return el.textContent = value != null ? value : '';
+    if (value == null) {
+      value = '';
+    }
+    if (el.textContent) {
+      return el.textContent = value;
     } else {
-      return el.innerText = value != null ? value : '';
+      return el.innerText = value;
     }
   };
 
@@ -839,23 +843,25 @@
         };
         data["%" + modelName + "%"] = index;
         data[modelName] = model;
-        if (!this.iterated[index]) {
-          ref = this.view.models;
-          for (key in ref) {
-            model = ref[key];
-            if (data[key] == null) {
-              data[key] = model;
-            }
+        ref = this.view.models;
+        for (key in ref) {
+          model = ref[key];
+          if (data[key] == null) {
+            data[key] = model;
           }
-          previous = this.iterated.length ? this.iterated[this.iterated.length - 1].els[0] : this.marker;
+        }
+        if (!this.iterated[index]) {
           template = el.cloneNode(true);
           view = new Rivets.View(template, data);
-          view.bind();
-          this.iterated.push(view);
+          previous = this.iterated[index - 1] ? this.iterated[index - 1].els[0] : this.marker;
           this.marker.parentNode.insertBefore(template, previous.nextSibling);
-        } else if (this.iterated[index].models[modelName] !== model) {
-          this.iterated[index].update(data);
+          this.iterated.push(view);
+        } else {
+          view = new Rivets.View(this.iterated[index].els[0], data);
+          this.iterated[index].unbind();
+          this.iterated[index] = view;
         }
+        view.bind();
       }
       if (el.nodeName === 'OPTION') {
         ref1 = this.view.bindings;
@@ -870,23 +876,6 @@
         }
         return results;
       }
-    },
-    update: function(models) {
-      var data, i, key, len, model, ref, results, view;
-      data = {};
-      for (key in models) {
-        model = models[key];
-        if (key !== this.args[0]) {
-          data[key] = model;
-        }
-      }
-      ref = this.iterated;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        view = ref[i];
-        results.push(view.update(data));
-      }
-      return results;
     }
   };
 

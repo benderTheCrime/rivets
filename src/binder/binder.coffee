@@ -1,10 +1,10 @@
 binders = Rivets.binders = {}
 
-binders.text = (el, value) ->
-  if el.textContent?
-    el.textContent = if value? then value else ''
+binders.text = (el, value = '') ->
+  if el.textContent
+    el.textContent = value
   else
-    el.innerText = if value? then value else ''
+    el.innerText = value
 
 binders.html = (el, value) ->
   return binders.text el, value if typeof value is 'string'
@@ -125,37 +125,27 @@ binders[ 'each-*' ] =
       data = { index }
       data[ "%#{modelName}%" ] = index
       data[ modelName ] = model
+      data[ key ] ?= model for key, model of @view.models
 
-      if not @iterated[ index ]
-        for key, model of @view.models
-          data[ key ] ?= model
-
-        previous = if @iterated.length
-          @iterated[ @iterated.length - 1 ].els[ 0 ]
-        else
-          @marker
-
+      unless @iterated[ index ]
         template = el.cloneNode true
         view = new Rivets.View template, data
-        view.bind()
-        @iterated.push view
+        previous = if @iterated[ index - 1 ] then @iterated[ index - 1 ].els[ 0 ] else @marker
 
         @marker.parentNode.insertBefore template, previous.nextSibling
-      else if @iterated[ index ].models[ modelName ] isnt model
-        @iterated[ index ].update data
+        @iterated.push view
+      else
+        view = new Rivets.View @iterated[ index ].els[ 0 ], data
+
+        @iterated[ index ].unbind()
+        @iterated[ index ] = view
+
+      view.bind()
 
     if el.nodeName is 'OPTION'
       for binding in @view.bindings
         if binding.el is @marker.parentNode and binding.type is 'value'
           binding.sync()
-
-  update: (models) ->
-    data = {}
-
-    for key, model of models
-      data[ key ] = model unless key is @args[ 0 ]
-
-    view.update data for view in @iterated
 
 binders[ 'class-*' ] = (el, value) ->
   elClass = " #{el.className} "
