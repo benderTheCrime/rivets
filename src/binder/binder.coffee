@@ -7,11 +7,8 @@ binders.text = (el, value) ->
     el.innerText = if value? then value else ''
 
 binders.html = (el, value) ->
-  value = value.outerHTML if (value instanceof HTMLElement)
-
-  return this.text(el, value) if typeof value? is 'string'
-
-  el.innerHTML = if value? then value else ''
+  return binders.text el, value if typeof value is 'string'
+  el.innerHTML = value if value instanceof HTMLElement
 
 binders.show = (el, value) -> el.style.display = if value then '' else 'none'
 binders.hide = (el, value) -> el.style.display = if value then 'none' else ''
@@ -35,6 +32,7 @@ binders.value =
       el.removeEventListener @event, @publish
 
   routine: (el, value) ->
+    setValue = () -> el.value = value if value?.toString() isnt el.value?.toString()
     value = value || ''
     tagName = el.tagName
     type = el.type
@@ -44,10 +42,8 @@ binders.value =
         el.setAttribute 'value', value
       else if type is 'checkbox'
         el.checked = value
-      else
-        el.value = value
-    else
-      el.value = value
+      else setValue()
+    else setValue()
 
 binders.if =
   block: true
@@ -55,7 +51,7 @@ binders.if =
 
   bind: (el) ->
     unless @marker?
-      attr = ['cb', @type].join('-').replace '--', '-'
+      attr = [ 'cb', @type ].join('-').replace '--', '-'
       declaration = el.getAttribute attr
 
       @marker = document.createComment " rivets: #{@type} #{declaration} "
@@ -89,7 +85,7 @@ binders.unless =
   routine: (el, value) -> binders.if.routine.call @, el, not value
   update: (models) -> binders.if.update.call @, models
 
-binders['on-*'] =
+binders[ 'on-*' ] =
   function: true
   priority: 1000
 
@@ -98,13 +94,13 @@ binders['on-*'] =
     el.removeEventListener @args[0], @handler if @handler
     el.addEventListener @args[0], @handler = @eventHandler value
 
-binders['each-*'] =
+binders[ 'each-*' ] =
   block: true
   priority: 4000
 
   bind: (el) ->
     unless @marker?
-      attr = ['cb', @type].join('-').replace '--', '-'
+      attr = [ 'cb', @type ].join('-').replace '--', '-'
       @marker = document.createComment " rivets: #{@type} "
       @iterated = []
 
@@ -114,14 +110,10 @@ binders['each-*'] =
     else
       for view in @iterated
         view.bind()
-    return;
 
-  unbind: (el) ->
-    view.unbind() for view in @iterated if @iterated?
-    return
-
+  unbind: (el) -> view.unbind() for view in @iterated if @iterated?
   routine: (el, collection) ->
-    modelName = @args[0]
+    modelName = @args[ 0 ]
     collection = collection or []
 
     if @iterated.length > collection.length
@@ -135,12 +127,12 @@ binders['each-*'] =
       data[ "%#{modelName}%" ] = index
       data[ modelName ] = model
 
-      if not @iterated[index]?
+      if not @iterated[ index ]?
         for key, model of @view.models
-          data[key] ?= model
+          data[ key ] ?= model
 
         previous = if @iterated.length
-          @iterated[@iterated.length - 1].els[0]
+          @iterated[ @iterated.length - 1 ].els[0]
         else
           @marker
 
@@ -150,14 +142,13 @@ binders['each-*'] =
         @iterated.push view
 
         @marker.parentNode.insertBefore template, previous.nextSibling
-      else if @iterated[index].models[modelName] isnt model
-        @iterated[index].update data
+      else if @iterated[ index ].models[ modelName ] isnt model
+        @iterated[ index ].update data
 
     if el.nodeName is 'OPTION'
       for binding in @view.bindings
         if binding.el is @marker.parentNode and binding.type is 'value'
           binding.sync()
-    return
 
   update: (models) ->
     data = {}
@@ -166,9 +157,8 @@ binders['each-*'] =
       data[key] = model unless key is @args[0]
 
     view.update data for view in @iterated
-    return
 
-binders['class-*'] = (el, value) ->
+binders[ 'class-*' ] = (el, value) ->
   elClass = " #{el.className} "
 
   if !value is (elClass.indexOf(" #{@args[0]} ") isnt -1)
@@ -177,9 +167,9 @@ binders['class-*'] = (el, value) ->
     else
       elClass.replace(" #{@args[0]} ", ' ').trim()
 
-binders['no-class-*'] = (el, value) -> binders['class-*'].call @, el, not value
+binders[ 'no-class-*' ] = (el, value) -> binders[ 'class-*' ].call @, el, not value
 
-binders['*'] = (el, value) ->
+binders[ '*' ] = (el, value) ->
   if value?
     el.setAttribute @type, value
   else

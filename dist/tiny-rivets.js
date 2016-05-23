@@ -1,7 +1,6 @@
 (function() {
   var Observer, Rivets, binders,
     slice = [].slice,
-    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
@@ -32,89 +31,86 @@
   };
 
   Observer = Rivets.Observer = (function() {
-    function _Class(callbacks) {
-      this.callbacks = callbacks != null ? callbacks : {};
+    function _Class(callbacks1) {
+      this.callbacks = callbacks1 != null ? callbacks1 : {};
       this;
     }
 
-    _Class.prototype.observe = function(obj, keypath, callback) {
-      var base, fn, j, key, keys, len, parentKeypath, parentValue, ref, results, value;
-      if (callback == null) {
-        callback = function() {
-          return void 0;
-        };
+    _Class.prototype.observe = function(obj1, keypath, callback) {
+      var base, callbacks, fn, j, key, keys, len, parentKeypath, parentValue, ref, results, value;
+      this.obj = obj1;
+      if (!this.keypath) {
+        this.keypath = keypath;
       }
-      this.obj = this.obj || obj;
-      this.keypath = this.keypath || keypath;
       keys = keypath.split('.');
       key = keys.pop();
       parentKeypath = keys.join('.');
-      parentValue = this.walkObjectKeypath(obj, parentKeypath);
-      if (indexOf.call(((base = this.callbacks)[keypath] != null ? base[keypath] : base[keypath] = []), callback) < 0) {
-        this.callbacks[keypath].push(callback);
+      parentValue = this.walkObjectKeypath(this.obj, parentKeypath);
+      callbacks = (base = this.callbacks)[keypath] != null ? base[keypath] : base[keypath] = [];
+      if (callback) {
+        callbacks.push(callback);
       }
-      if (parentValue && typeof parentValue === 'object') {
-        value = parentValue[key];
-        Object.defineProperty(parentValue, key, {
-          enumerable: true,
-          configurable: true,
-          get: function() {
-            return value;
-          },
-          set: (function(_this) {
-            return function(newValue) {
-              var _, cb, ref, results;
-              if (value !== newValue) {
-                value = newValue;
-                ref = _this.callbacks;
-                results = [];
-                for (key in ref) {
-                  _ = ref[key];
-                  if (key.indexOf(keypath) > -1) {
-                    results.push((function() {
-                      var j, len, ref1, results1;
-                      ref1 = this.callbacks[key];
-                      results1 = [];
-                      for (j = 0, len = ref1.length; j < len; j++) {
-                        cb = ref1[j];
-                        this.observe(obj, key, callback);
-                        results1.push(cb());
-                      }
-                      return results1;
-                    }).call(_this));
-                  } else {
-                    results.push(void 0);
-                  }
+      if (!parentValue) {
+        parentValue = this.walkObjectKeypath(this.obj, parentKeypath, {});
+        this.observe(this.obj, parentKeypath);
+      }
+      value = parentValue[key];
+      Object.defineProperty(parentValue, key, {
+        enumerable: true,
+        configurable: true,
+        get: function() {
+          return value;
+        },
+        set: (function(_this) {
+          return function(newValue) {
+            var _, cb, ref, results;
+            if (value !== newValue) {
+              value = newValue;
+              ref = _this.callbacks;
+              results = [];
+              for (key in ref) {
+                _ = ref[key];
+                if (key.indexOf(keypath) > -1) {
+                  results.push((function() {
+                    var j, len, ref1, results1;
+                    ref1 = this.callbacks[key];
+                    results1 = [];
+                    for (j = 0, len = ref1.length; j < len; j++) {
+                      cb = ref1[j];
+                      this.observe(this.obj, key);
+                      results1.push(cb());
+                    }
+                    return results1;
+                  }).call(_this));
+                } else {
+                  results.push(void 0);
                 }
-                return results;
               }
-            };
-          })(this)
-        });
-        if (Array.isArray(value)) {
-          ref = ['push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice'];
-          results = [];
-          for (j = 0, len = ref.length; j < len; j++) {
-            fn = ref[j];
-            results.push(((function(_this) {
-              return function(original) {
-                return value[fn] = function() {
-                  var cb, k, len1, ref1, response;
-                  response = original.apply(value, arguments);
-                  ref1 = _this.callbacks[keypath];
-                  for (k = 0, len1 = ref1.length; k < len1; k++) {
-                    cb = ref1[k];
-                    cb();
-                  }
-                  return response;
-                };
+              return results;
+            }
+          };
+        })(this)
+      });
+      if (Array.isArray(value)) {
+        ref = ['push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice'];
+        results = [];
+        for (j = 0, len = ref.length; j < len; j++) {
+          fn = ref[j];
+          results.push(((function(_this) {
+            return function(original) {
+              return value[fn] = function() {
+                var cb, k, len1, response;
+                response = original.apply(value, arguments);
+                for (k = 0, len1 = callbacks.length; k < len1; k++) {
+                  cb = callbacks[k];
+                  cb();
+                }
+                return response;
               };
-            })(this))(value[fn]));
-          }
-          return results;
+            };
+          })(this))(value[fn]));
         }
-      } else {
-        return this.observe(obj, parentKeypath);
+        return results;
       }
     };
 
@@ -162,10 +158,10 @@
   })();
 
   Rivets.View = (function() {
-    function _Class(els, models1, callbacks) {
+    function _Class(els, models1, callbacks1) {
       this.els = els;
       this.models = models1;
-      this.callbacks = callbacks != null ? callbacks : {};
+      this.callbacks = callbacks1 != null ? callbacks1 : {};
       this.update = bind(this.update, this);
       this.publish = bind(this.publish, this);
       this.unbind = bind(this.unbind, this);
@@ -356,7 +352,7 @@
     };
 
     _Class.prototype.update = function(models) {
-      var binding, j, key, len, model, ref;
+      var binding, j, key, len, model, ref, results;
       if (models == null) {
         models = {};
       }
@@ -365,12 +361,12 @@
         this.models[key] = model;
       }
       ref = this.bindings;
+      results = [];
       for (j = 0, len = ref.length; j < len; j++) {
         binding = ref[j];
-        if (typeof binding.update === "function") {
-          binding.update(models);
-        }
+        results.push(typeof binding.update === "function" ? binding.update(models) : void 0);
       }
+      return results;
     };
 
     return _Class;
@@ -556,7 +552,7 @@
     };
 
     _Class.prototype.sync = function() {
-      return this.set(this.observer ? this.observer.get() : this.value);
+      return this.set(this.observer ? this.observer.get() : void 0);
     };
 
     _Class.prototype.publish = function() {
@@ -655,13 +651,12 @@
   };
 
   binders.html = function(el, value) {
+    if (typeof value === 'string') {
+      return binders.text(el, value);
+    }
     if (value instanceof HTMLElement) {
-      value = value.outerHTML;
+      return el.innerHTML = value;
     }
-    if (typeof (value != null) === 'string') {
-      return this.text(el, value);
-    }
-    return el.innerHTML = value != null ? value : '';
   };
 
   binders.show = function(el, value) {
@@ -698,7 +693,13 @@
       }
     },
     routine: function(el, value) {
-      var tagName, type;
+      var setValue, tagName, type;
+      setValue = function() {
+        var ref;
+        if ((value != null ? value.toString() : void 0) !== ((ref = el.value) != null ? ref.toString() : void 0)) {
+          return el.value = value;
+        }
+      };
       value = value || '';
       tagName = el.tagName;
       type = el.type;
@@ -708,10 +709,10 @@
         } else if (type === 'checkbox') {
           return el.checked = value;
         } else {
-          return el.value = value;
+          return setValue();
         }
       } else {
-        return el.value = value;
+        return setValue();
       }
     }
   };
@@ -791,34 +792,38 @@
     block: true,
     priority: 4000,
     bind: function(el) {
-      var attr, j, len, ref, view;
+      var attr, j, len, ref, results, view;
       if (this.marker == null) {
         attr = ['cb', this.type].join('-').replace('--', '-');
         this.marker = document.createComment(" rivets: " + this.type + " ");
         this.iterated = [];
         el.removeAttribute(attr);
         el.parentNode.insertBefore(this.marker, el);
-        el.parentNode.removeChild(el);
+        return el.parentNode.removeChild(el);
       } else {
         ref = this.iterated;
+        results = [];
         for (j = 0, len = ref.length; j < len; j++) {
           view = ref[j];
-          view.bind();
+          results.push(view.bind());
         }
+        return results;
       }
     },
     unbind: function(el) {
-      var j, len, ref, view;
+      var j, len, ref, results, view;
       if (this.iterated != null) {
         ref = this.iterated;
+        results = [];
         for (j = 0, len = ref.length; j < len; j++) {
           view = ref[j];
-          view.unbind();
+          results.push(view.unbind());
         }
+        return results;
       }
     },
     routine: function(el, collection) {
-      var binding, data, i, index, j, k, key, l, len, len1, len2, model, modelName, previous, ref, ref1, ref2, template, view;
+      var binding, data, i, index, j, k, key, l, len, len1, len2, model, modelName, previous, ref, ref1, ref2, results, template, view;
       modelName = this.args[0];
       collection = collection || [];
       if (this.iterated.length > collection.length) {
@@ -857,16 +862,20 @@
       }
       if (el.nodeName === 'OPTION') {
         ref2 = this.view.bindings;
+        results = [];
         for (l = 0, len2 = ref2.length; l < len2; l++) {
           binding = ref2[l];
           if (binding.el === this.marker.parentNode && binding.type === 'value') {
-            binding.sync();
+            results.push(binding.sync());
+          } else {
+            results.push(void 0);
           }
         }
+        return results;
       }
     },
     update: function(models) {
-      var data, j, key, len, model, ref, view;
+      var data, j, key, len, model, ref, results, view;
       data = {};
       for (key in models) {
         model = models[key];
@@ -875,10 +884,12 @@
         }
       }
       ref = this.iterated;
+      results = [];
       for (j = 0, len = ref.length; j < len; j++) {
         view = ref[j];
-        view.update(data);
+        results.push(view.update(data));
       }
+      return results;
     }
   };
 

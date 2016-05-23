@@ -55,11 +55,7 @@ Rivets.Binding = class
 
   set: (value) => @binder.routine?.call @, @el, @formattedValue value
 
-  sync: =>
-    @set if @observer
-      @observer.get()
-    else
-      @value
+  sync: => @set if @observer then @observer.get()
 
   publish: =>
     if @observer
