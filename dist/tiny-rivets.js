@@ -338,7 +338,6 @@
     };
 
     _Class.prototype.publish = function() {
-      debugger;
       var binding, i, len, ref, results;
       ref = this.select(function(b) {
         var ref;
@@ -557,7 +556,6 @@
     };
 
     _Class.prototype.publish = function() {
-      debugger;
       var args, formatter, i, id, len, ref, ref1, ref2, value;
       if (this.observer) {
         value = this.getValue(this.el);

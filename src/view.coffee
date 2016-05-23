@@ -69,9 +69,7 @@ Rivets.View = class
   select: (fn) => binding for binding in @bindings when fn binding
   bind: => binding.bind() for binding in @bindings
   unbind: => binding.unbind() for binding in @bindings
-  publish: =>
-    debugger
-    binding.publish() for binding in @select (b) -> b.binder?.publishes
+  publish: => binding.publish() for binding in @select (b) -> b.binder?.publishes
   update: (models = {}) =>
     @models[ key ] = model for key, model of models
     binding.update? models for binding in @bindings
