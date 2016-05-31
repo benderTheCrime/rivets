@@ -1,10 +1,7 @@
 binders = Rivets.binders = {}
 
 binders.text = (el, value = '') ->
-  if el.textContent
-    el.textContent = value
-  else
-    el.innerText = value
+  el[ if el.textContent then 'textContent' else 'innerText' ] = value
 
 binders.html = (el, value) ->
   return binders.text el, value if typeof value is 'string'

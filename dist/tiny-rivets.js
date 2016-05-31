@@ -6,7 +6,7 @@
     hasProp = {}.hasOwnProperty;
 
   Rivets = {
-    STRING_TEMPLATE_REGEXP: /\{{1,2}\s+?([a-z0-9\.]+)\s+?\}{1,2}/gi,
+    STRING_TEMPLATE_REGEXP: /\{{1,2}\s*?([a-z0-9\.]+)\s*?\}{1,2}/gi,
     formatters: {
       call: function() {
         var args, value;
@@ -508,29 +508,37 @@
     };
 
     _Class.prototype.formattedValue = function(value) {
-      var ai, arg, args, base, fi, formatter, i, id, j, len, len1, observer, processedArgs, ref, ref1;
-      ref = this.formatters;
-      for (fi = i = 0, len = ref.length; i < len; fi = ++i) {
-        formatter = ref[fi];
+      var ai, arg, args, base, fi, formatter, i, id, j, k, keypath, len, len1, len2, match, observer, processedArgs, ref, ref1, ref2;
+      if (value && typeof value === 'string' && this.observer) {
+        ref = Rivets.TextTemplateParser.parse(this.observer.get());
+        for (i = 0, len = ref.length; i < len; i++) {
+          match = ref[i];
+          keypath = match.value.replace(/[\{\}]/g, '');
+          value = value.replace(match.value, this.view.models[keypath] || this.observer.get(keypath));
+        }
+      }
+      ref1 = this.formatters;
+      for (fi = j = 0, len1 = ref1.length; j < len1; fi = ++j) {
+        formatter = ref1[fi];
         args = formatter.match(/[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g);
         id = args.shift();
         formatter = this.view.formatters[id];
         args = (function() {
-          var j, len1, results;
+          var k, len2, results;
           results = [];
-          for (j = 0, len1 = args.length; j < len1; j++) {
-            arg = args[j];
+          for (k = 0, len2 = args.length; k < len2; k++) {
+            arg = args[k];
             results.push(Rivets.TypeParser.parse(arg));
           }
           return results;
         })();
         processedArgs = [];
-        for (ai = j = 0, len1 = args.length; j < len1; ai = ++j) {
+        for (ai = k = 0, len2 = args.length; k < len2; ai = ++k) {
           arg = args[ai];
           processedArgs.push(arg.type === 0 ? arg.value : ((base = this.formatterObservers)[fi] || (base[fi] = {}), !(observer = this.formatterObservers[fi][ai]) ? (observer = this.observe(this.view.models, arg.value, this.sync), this.formatterObservers[fi][ai] = observer) : void 0, observer.value()));
         }
         if ((formatter != null ? formatter.read : void 0) instanceof Function) {
-          value = (ref1 = formatter.read).call.apply(ref1, [this.view.models, value].concat(slice.call(processedArgs)));
+          value = (ref2 = formatter.read).call.apply(ref2, [this.view.models, value].concat(slice.call(processedArgs)));
         } else if (formatter instanceof Function) {
           value = formatter.call.apply(formatter, [this.view.models, value].concat(slice.call(processedArgs)));
         }
@@ -646,11 +654,7 @@
     if (value == null) {
       value = '';
     }
-    if (el.textContent) {
-      return el.textContent = value;
-    } else {
-      return el.innerText = value;
-    }
+    return el[el.textContent ? 'textContent' : 'innerText'] = value;
   };
 
   binders.html = function(el, value) {
