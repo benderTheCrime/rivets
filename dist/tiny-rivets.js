@@ -509,15 +509,12 @@
 
     _Class.prototype.formattedValue = function(value) {
       var ai, arg, args, base, fi, formatter, i, id, j, k, keypath, len, len1, len2, match, observer, processedArgs, ref, ref1, ref2;
-      if (this.observer) {
-        value = this.observer.get() || '';
-        if (value && typeof value === 'string') {
-          ref = Rivets.TextTemplateParser.parse(this.observer.get());
-          for (i = 0, len = ref.length; i < len; i++) {
-            match = ref[i];
-            keypath = match.value.replace(/[\{\}]/g, '');
-            value = value.replace(match.value, this.view.models[keypath] || this.observer.get(keypath));
-          }
+      if (value && typeof value === 'string' && this.observer) {
+        ref = Rivets.TextTemplateParser.parse(this.observer.get());
+        for (i = 0, len = ref.length; i < len; i++) {
+          match = ref[i];
+          keypath = match.value.replace(/[\{\}]/g, '');
+          value = value.replace(match.value, this.view.models[keypath] || this.observer.get(keypath));
         }
       }
       ref1 = this.formatters;
