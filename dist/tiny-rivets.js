@@ -562,11 +562,10 @@
       return (ref = this.binder.routine) != null ? ref.call(this, this.el, this.formattedValue(value)) : void 0;
     };
 
-    _Class.prototype.sync = function(value) {
-      if (value == null) {
-        value = '';
-      }
-      if (this.observer && typeof value === 'string') {
+    _Class.prototype.sync = function() {
+      var value;
+      value = '';
+      if (this.observer) {
         value = Rivets.TextTemplateParser.replace(this.view.models, this.observer.get());
       }
       return this.set(value);
@@ -663,17 +662,10 @@
     if (value == null) {
       value = '';
     }
-    console.log(this, arguments);
-    debugger;
-    if (el.textContent) {
-      return el.textContent = value;
-    } else {
-      return el.innerText = value;
-    }
+    return el[el.textContent ? 'textContent' : 'innerText'] = value;
   };
 
   binders.html = function(el, value) {
-    debugger;
     if (typeof value === 'string') {
       return binders.text(el, value);
     }

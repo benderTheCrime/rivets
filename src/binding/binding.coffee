@@ -53,8 +53,10 @@ Rivets.Binding = class
 
   eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
   set: (value) => @binder.routine?.call @, @el, @formattedValue value
-  sync: (value = '') =>
-    if @observer and typeof value is 'string'
+  sync: =>
+    value = ''
+
+    if @observer
       value = Rivets.TextTemplateParser.replace @view.models, @observer.get()
 
     @set value

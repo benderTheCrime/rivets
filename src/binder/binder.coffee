@@ -1,18 +1,9 @@
 binders = Rivets.binders = {}
 
 binders.text = (el, value = '') ->
-  console.log(this, arguments);
-  debugger;
-  # value.replace(match, for match in Rivets.TextTemplateParser.parse value
-  # value = Rivets.TextTemplateParser.parse value
-
-  if el.textContent
-    el.textContent = value
-  else
-    el.innerText = value
+  el[ if el.textContent then 'textContent' else 'innerText' ] = value
 
 binders.html = (el, value) ->
-  debugger
   return binders.text el, value if typeof value is 'string'
   el.innerHTML = value.outerHTML if value instanceof HTMLElement
 
