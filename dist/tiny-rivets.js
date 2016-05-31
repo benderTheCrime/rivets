@@ -6,7 +6,7 @@
     hasProp = {}.hasOwnProperty;
 
   Rivets = {
-    STRING_TEMPLATE_REGEXP: /\{{1,2}\s+?([a-z0-9\.]+)\s+?\}{1,2}/gi,
+    STRING_TEMPLATE_REGEXP: /\{{1,2}\s*?([a-z0-9\.]+)\s*?\}{1,2}/gi,
     formatters: {
       call: function() {
         var args, value;
@@ -449,6 +449,17 @@
       })(this));
     };
 
+    _Class.replace = function(obj, template) {
+      var i, len, match, ref, value;
+      ref = this.parse(template);
+      for (i = 0, len = ref.length; i < len; i++) {
+        match = ref[i];
+        value = match.value;
+        template = template.replace(value, obj[value.replace(/[\{\}]/g, '')]);
+      }
+      return template;
+    };
+
     return _Class;
 
   })();
@@ -551,8 +562,14 @@
       return (ref = this.binder.routine) != null ? ref.call(this, this.el, this.formattedValue(value)) : void 0;
     };
 
-    _Class.prototype.sync = function() {
-      return this.set(this.observer ? this.observer.get() : void 0);
+    _Class.prototype.sync = function(value) {
+      if (value == null) {
+        value = '';
+      }
+      if (this.observer && typeof value === 'string') {
+        value = Rivets.TextTemplateParser.replace(this.view.models, this.observer.get());
+      }
+      return this.set(value);
     };
 
     _Class.prototype.publish = function() {
@@ -646,6 +663,8 @@
     if (value == null) {
       value = '';
     }
+    console.log(this, arguments);
+    debugger;
     if (el.textContent) {
       return el.textContent = value;
     } else {
@@ -654,6 +673,7 @@
   };
 
   binders.html = function(el, value) {
+    debugger;
     if (typeof value === 'string') {
       return binders.text(el, value);
     }
