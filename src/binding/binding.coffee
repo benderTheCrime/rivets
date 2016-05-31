@@ -24,6 +24,14 @@ Rivets.Binding = class
     observer
 
   formattedValue: (value) =>
+    if @observer
+      value = @observer.get() || ''
+
+      if value and typeof value is 'string'
+        for match in Rivets.TextTemplateParser.parse @observer.get()
+          keypath = match.value.replace /[\{\}]/g, ''
+          value = value.replace match.value, @view.models[ keypath ] or @observer.get keypath
+
     for formatter, fi in @formatters
       args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
       id = args.shift()
@@ -53,14 +61,7 @@ Rivets.Binding = class
 
   eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
   set: (value) => @binder.routine?.call @, @el, @formattedValue value
-  sync: =>
-    value = ''
-
-    if @observer
-      value = Rivets.TextTemplateParser.replace @view.models, @observer.get()
-
-    @set value
-
+  sync: => @set if @observer then @observer.get()
   publish: =>
     if @observer
       value = @getValue @el
