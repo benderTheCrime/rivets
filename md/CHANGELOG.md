@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+#### [1.3.2] - 2016-05-31
+##### Fixed
+- Fixed an issue with the `cb-text` and `cb-html` binders not binding
+templated string values properly
+
 #### [1.3.1] - 2016-05-23
 ##### Fixed
 - Fixed an issue with the `cb-each` binder not updating the view model
