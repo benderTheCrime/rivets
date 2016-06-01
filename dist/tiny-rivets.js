@@ -564,7 +564,6 @@
     };
 
     _Class.prototype.publish = function() {
-      debugger;
       var args, formatter, i, id, len, ref, ref1, ref2, value;
       if (this.observer) {
         value = this.getValue(this.el);
