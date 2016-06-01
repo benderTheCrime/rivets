@@ -16,22 +16,7 @@ Rivets.View = class
     @bindings = []
 
     parse = (node) =>
-      if node.nodeType is 3
-        parser = Rivets.TextTemplateParser
-
-        if (tokens = parser.parse(node.data)).length
-          unless tokens.length is 1 and tokens[0].type is parser.types.text
-            for token in tokens
-              text = document.createTextNode token.value
-              node.parentNode.insertBefore text, node
-
-              if token.type is 1
-                @buildBinding 'TextBinding', text, null, token.value
-            node.parentNode.removeChild node
-      else if node.nodeType is 1
-        block = @traverse node
-
-      unless block
+      unless (if node.nodeType is 1 then @traverse(node) else null)
         parse childNode for childNode in (n for n in node.childNodes)
 
     parse el for el in @els

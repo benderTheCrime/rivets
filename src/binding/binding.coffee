@@ -25,9 +25,9 @@ Rivets.Binding = class
 
   formattedValue: (value) =>
     if value and typeof value is 'string' and @observer
-      for match in Rivets.TextTemplateParser.parse @observer.get()
-        keypath = match.value.replace /[\{\}]/g, ''
-        value = value.replace match.value, @view.models[ keypath ] or @observer.get keypath
+      for match in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? [] 
+        keypath = match.replace /[\{\}]/g, ''
+        value = value.replace match, @view.models[ keypath ] or @observer.get keypath
 
     for formatter, fi in @formatters
       args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g

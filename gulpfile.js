@@ -12,7 +12,6 @@ const SRC = [
     'src/observer.coffee',
     'src/view.coffee',
     'src/parser/type-parser.coffee',
-    'src/parser/text-template-parser.coffee',
     'src/binding/binding.coffee',
     'src/binding/text-binding.coffee',
     'src/binder/binder.coffee',
