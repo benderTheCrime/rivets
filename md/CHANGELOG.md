@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### [1.4.0] - 2016-06-01
+#### Changed/Removed
+- HTML text nodes no longer attempt to bind templated string values (only binder
+referenced values do so)
+- Removed `Rivets.TextTemplateParser`, moved all functionality into the binding
+
 #### [1.3.3] - 2016-05-31
 ##### Fixed
 - Fixed an issue with the `cb-each` binder not updating the view model
