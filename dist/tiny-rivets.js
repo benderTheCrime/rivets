@@ -832,7 +832,7 @@
       }
     },
     routine: function(el, collection) {
-      var binding, data, i, index, j, key, len, len1, model, modelName, previous, ref, ref1, results, template, view;
+      var binding, data, i, index, j, len, len1, model, modelName, previous, ref, results, template, view;
       modelName = this.args[0];
       collection = collection || [];
       while (this.iterated.length > collection.length) {
@@ -842,18 +842,8 @@
       }
       for (index = i = 0, len = collection.length; i < len; index = ++i) {
         model = collection[index];
-        data = {
-          index: index
-        };
-        data["%" + modelName + "%"] = index;
+        data = this.view.models;
         data[modelName] = model;
-        ref = this.view.models;
-        for (key in ref) {
-          model = ref[key];
-          if (data[key] == null) {
-            data[key] = model;
-          }
-        }
         if (!this.iterated[index]) {
           template = el.cloneNode(true);
           view = new Rivets.View(template, data);
@@ -866,12 +856,13 @@
           this.iterated[index] = view;
         }
         view.bind();
+        delete data[modelName];
       }
       if (el.nodeName === 'OPTION') {
-        ref1 = this.view.bindings;
+        ref = this.view.bindings;
         results = [];
-        for (j = 0, len1 = ref1.length; j < len1; j++) {
-          binding = ref1[j];
+        for (j = 0, len1 = ref.length; j < len1; j++) {
+          binding = ref[j];
           if (binding.el === this.marker.parentNode && binding.type === 'value') {
             results.push(binding.sync());
           } else {
