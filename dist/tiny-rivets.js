@@ -213,39 +213,21 @@
       this.bindings = [];
       parse = (function(_this) {
         return function(node) {
-          var block, childNode, i, j, len, len1, n, parser, ref, results, text, token, tokens;
-          if (node.nodeType === 3) {
-            parser = Rivets.TextTemplateParser;
-            if ((tokens = parser.parse(node.data)).length) {
-              if (!(tokens.length === 1 && tokens[0].type === parser.types.text)) {
-                for (i = 0, len = tokens.length; i < len; i++) {
-                  token = tokens[i];
-                  text = document.createTextNode(token.value);
-                  node.parentNode.insertBefore(text, node);
-                  if (token.type === 1) {
-                    _this.buildBinding('TextBinding', text, null, token.value);
-                  }
-                }
-                node.parentNode.removeChild(node);
-              }
-            }
-          } else if (node.nodeType === 1) {
-            block = _this.traverse(node);
-          }
-          if (!block) {
+          var childNode, i, len, n, ref, results;
+          if (!(node.nodeType === 1 ? _this.traverse(node) : null)) {
             ref = (function() {
-              var k, len1, ref, results1;
+              var j, len, ref, results1;
               ref = node.childNodes;
               results1 = [];
-              for (k = 0, len1 = ref.length; k < len1; k++) {
-                n = ref[k];
+              for (j = 0, len = ref.length; j < len; j++) {
+                n = ref[j];
                 results1.push(n);
               }
               return results1;
             })();
             results = [];
-            for (j = 0, len1 = ref.length; j < len1; j++) {
-              childNode = ref[j];
+            for (i = 0, len = ref.length; i < len; i++) {
+              childNode = ref[i];
               results.push(parse(childNode));
             }
             return results;
@@ -429,30 +411,6 @@
 
   })();
 
-  Rivets.TextTemplateParser = (function() {
-    function _Class() {}
-
-    _Class.types = {
-      text: 0,
-      binding: 1
-    };
-
-    _Class.parse = function(template) {
-      var ref;
-      return ((ref = template.match(Rivets.STRING_TEMPLATE_REGEXP)) != null ? ref : []).map((function(_this) {
-        return function(m) {
-          return {
-            type: _this.types.text,
-            value: m
-          };
-        };
-      })(this));
-    };
-
-    return _Class;
-
-  })();
-
   Rivets.Binding = (function() {
     function _Class(view1, el1, type1, keypath1) {
       this.view = view1;
@@ -508,18 +466,18 @@
     };
 
     _Class.prototype.formattedValue = function(value) {
-      var ai, arg, args, base, fi, formatter, i, id, j, k, keypath, len, len1, len2, match, observer, processedArgs, ref, ref1, ref2;
+      var ai, arg, args, base, fi, formatter, i, id, j, k, keypath, len, len1, len2, match, observer, processedArgs, ref, ref1, ref2, ref3;
       if (value && typeof value === 'string' && this.observer) {
-        ref = Rivets.TextTemplateParser.parse(this.observer.get());
-        for (i = 0, len = ref.length; i < len; i++) {
-          match = ref[i];
-          keypath = match.value.replace(/[\{\}]/g, '');
-          value = value.replace(match.value, this.view.models[keypath] || this.observer.get(keypath));
+        ref1 = (ref = value.match(Rivets.STRING_TEMPLATE_REGEXP)) != null ? ref : [];
+        for (i = 0, len = ref1.length; i < len; i++) {
+          match = ref1[i];
+          keypath = match.replace(/[\{\}]/g, '');
+          value = value.replace(match, this.view.models[keypath] || this.observer.get(keypath));
         }
       }
-      ref1 = this.formatters;
-      for (fi = j = 0, len1 = ref1.length; j < len1; fi = ++j) {
-        formatter = ref1[fi];
+      ref2 = this.formatters;
+      for (fi = j = 0, len1 = ref2.length; j < len1; fi = ++j) {
+        formatter = ref2[fi];
         args = formatter.match(/[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g);
         id = args.shift();
         formatter = this.view.formatters[id];
@@ -538,7 +496,7 @@
           processedArgs.push(arg.type === 0 ? arg.value : ((base = this.formatterObservers)[fi] || (base[fi] = {}), !(observer = this.formatterObservers[fi][ai]) ? (observer = this.observe(this.view.models, arg.value, this.sync), this.formatterObservers[fi][ai] = observer) : void 0, observer.value()));
         }
         if ((formatter != null ? formatter.read : void 0) instanceof Function) {
-          value = (ref2 = formatter.read).call.apply(ref2, [this.view.models, value].concat(slice.call(processedArgs)));
+          value = (ref3 = formatter.read).call.apply(ref3, [this.view.models, value].concat(slice.call(processedArgs)));
         } else if (formatter instanceof Function) {
           value = formatter.call.apply(formatter, [this.view.models, value].concat(slice.call(processedArgs)));
         }
