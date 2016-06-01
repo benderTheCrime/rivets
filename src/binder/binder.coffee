@@ -118,10 +118,8 @@ binders[ 'each-*' ] =
       @marker.parentNode.removeChild view.els[ 0 ]
 
     for model, index in collection
-      data = { index }
-      data[ "%#{modelName}%" ] = index
+      data = @view.models
       data[ modelName ] = model
-      data[ key ] ?= model for key, model of @view.models
 
       unless @iterated[ index ]
         template = el.cloneNode true
@@ -137,6 +135,8 @@ binders[ 'each-*' ] =
         @iterated[ index ] = view
 
       view.bind()
+
+      delete data[ modelName ]
 
     if el.nodeName is 'OPTION'
       for binding in @view.bindings
