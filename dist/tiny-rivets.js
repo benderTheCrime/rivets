@@ -183,8 +183,8 @@
     };
 
     _Class.prototype.buildBinding = function(binding, node, type, declaration) {
-      var context, ctx, keypath, pipe, pipes;
-      pipes = (function() {
+      var context, ctx, formatters, keypath, pipe;
+      formatters = (function() {
         var i, len, ref, results;
         ref = declaration.match(/((?:'[^']*')*(?:(?:[^\|']+(?:'[^']*')*[^\|']*)+|[^\|]+))|^$/g);
         results = [];
@@ -196,7 +196,7 @@
       })();
       context = (function() {
         var i, len, ref, results;
-        ref = pipes.shift().split('<');
+        ref = formatters.shift().split('<');
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           ctx = ref[i];
@@ -205,7 +205,7 @@
         return results;
       })();
       keypath = context.shift();
-      return this.bindings.push(new Rivets[binding](this, node, type, keypath));
+      return this.bindings.push(new Rivets[binding](this, node, type, keypath, formatters));
     };
 
     _Class.prototype.build = function() {
@@ -412,11 +412,12 @@
   })();
 
   Rivets.Binding = (function() {
-    function _Class(view1, el1, type1, keypath1) {
+    function _Class(view1, el1, type1, keypath1, formatters1) {
       this.view = view1;
       this.el = el1;
       this.type = type1;
       this.keypath = keypath1;
+      this.formatters = formatters1;
       this.getValue = bind(this.getValue, this);
       this.update = bind(this.update, this);
       this.unbind = bind(this.unbind, this);
@@ -428,8 +429,6 @@
       this.formattedValue = bind(this.formattedValue, this);
       this.observe = bind(this.observe, this);
       this.setBinder = bind(this.setBinder, this);
-      this.formatters = [];
-      this.formatterObservers = {};
       this.callbacks = this.view.callbacks || {};
       this.setBinder();
     }
@@ -466,7 +465,7 @@
     };
 
     _Class.prototype.formattedValue = function(value) {
-      var ai, arg, args, base, fi, formatter, i, id, j, k, keypath, len, len1, len2, match, observer, processedArgs, ref, ref1, ref2, ref3;
+      var args, fi, formatter, i, id, j, keypath, len, len1, match, ref, ref1, ref2;
       if (value && typeof value === 'string' && this.observer) {
         ref1 = (ref = value.match(Rivets.STRING_TEMPLATE_REGEXP)) != null ? ref : [];
         for (i = 0, len = ref1.length; i < len; i++) {
@@ -480,25 +479,9 @@
         formatter = ref2[fi];
         args = formatter.match(/[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g);
         id = args.shift();
-        formatter = this.view.formatters[id];
-        args = (function() {
-          var k, len2, results;
-          results = [];
-          for (k = 0, len2 = args.length; k < len2; k++) {
-            arg = args[k];
-            results.push(Rivets.TypeParser.parse(arg));
-          }
-          return results;
-        })();
-        processedArgs = [];
-        for (ai = k = 0, len2 = args.length; k < len2; ai = ++k) {
-          arg = args[ai];
-          processedArgs.push(arg.type === 0 ? arg.value : ((base = this.formatterObservers)[fi] || (base[fi] = {}), !(observer = this.formatterObservers[fi][ai]) ? (observer = this.observe(this.view.models, arg.value, this.sync), this.formatterObservers[fi][ai] = observer) : void 0, observer.value()));
-        }
-        if ((formatter != null ? formatter.read : void 0) instanceof Function) {
-          value = (ref3 = formatter.read).call.apply(ref3, [this.view.models, value].concat(slice.call(processedArgs)));
-        } else if (formatter instanceof Function) {
-          value = formatter.call.apply(formatter, [this.view.models, value].concat(slice.call(processedArgs)));
+        formatter = Rivets.formatters[id];
+        if (formatter instanceof Function) {
+          value = formatter(value || '');
         }
       }
       return value;
@@ -522,7 +505,7 @@
     };
 
     _Class.prototype.publish = function() {
-      var args, formatter, i, id, len, ref, ref1, ref2, value;
+      var args, formatter, i, id, len, ref, value;
       if (this.observer) {
         value = this.getValue(this.el);
         ref = this.formatters.slice(0).reverse();
@@ -530,9 +513,6 @@
           formatter = ref[i];
           args = formatter.split(/\s+/);
           id = args.shift();
-          if ((ref1 = this.view.formatters[id]) != null ? ref1.publish : void 0) {
-            value = (ref2 = this.view.formatters[id]).publish.apply(ref2, [value].concat(slice.call(args)));
-          }
         }
         return this.observer.set(value);
       }
@@ -557,7 +537,6 @@
       if ((ref = this.binder.unbind) != null) {
         ref.call(this, this.el);
       }
-      this.formatterObservers = {};
       return delete this.observer;
     };
 
