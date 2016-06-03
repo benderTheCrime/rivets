@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+#### [1.5.0] - 2016-06-02
+##### Changed
+- Fixed and simplified the way that formatters work. Formatters are functions
+that take a value and parse it before its value is set
+
 ### [1.4.0] - 2016-06-01
 #### Changed/Removed
 - HTML text nodes no longer attempt to bind templated string values (only binder

@@ -1,6 +1,5 @@
 Rivets.Binding = class
   constructor: (@view, @el, @type, @keypath, @formatters) ->
-    @formatterObservers = {}
     @callbacks = @view.callbacks or {}
     @setBinder()
 
@@ -32,8 +31,8 @@ Rivets.Binding = class
       args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
       id = args.shift()
       formatter = Rivets.formatters[ id ]
+      value = formatter value or '' if formatter instanceof Function
 
-    value = formatter value or '' if formatter instanceof Function
     value
 
   eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
@@ -62,7 +61,6 @@ Rivets.Binding = class
 
   unbind: =>
     @binder.unbind?.call @, @el
-    @formatterObservers = {}
     delete @observer
 
   update: (models = {}) => @binder.update?.call @, models or @sync()

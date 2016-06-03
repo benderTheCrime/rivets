@@ -429,7 +429,6 @@
       this.formattedValue = bind(this.formattedValue, this);
       this.observe = bind(this.observe, this);
       this.setBinder = bind(this.setBinder, this);
-      this.formatterObservers = {};
       this.callbacks = this.view.callbacks || {};
       this.setBinder();
     }
@@ -481,9 +480,9 @@
         args = formatter.match(/[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g);
         id = args.shift();
         formatter = Rivets.formatters[id];
-      }
-      if (formatter instanceof Function) {
-        value = formatter(value || '');
+        if (formatter instanceof Function) {
+          value = formatter(value || '');
+        }
       }
       return value;
     };
@@ -538,7 +537,6 @@
       if ((ref = this.binder.unbind) != null) {
         ref.call(this, this.el);
       }
-      this.formatterObservers = {};
       return delete this.observer;
     };
 
