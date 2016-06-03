@@ -6,11 +6,11 @@ Rivets.View = class
 
   bindingRegExp: => new RegExp "^cb-"
   buildBinding: (binding, node, type, declaration) =>
-    pipes = (pipe.trim() for pipe in declaration.match /((?:'[^']*')*(?:(?:[^\|']+(?:'[^']*')*[^\|']*)+|[^\|]+))|^$/g)
-    context = (ctx.trim() for ctx in pipes.shift().split '<')
+    formatters = (pipe.trim() for pipe in declaration.match /((?:'[^']*')*(?:(?:[^\|']+(?:'[^']*')*[^\|']*)+|[^\|]+))|^$/g)
+    context = (ctx.trim() for ctx in formatters.shift().split '<')
     keypath = context.shift()
 
-    @bindings.push new Rivets[ binding ] @, node, type, keypath
+    @bindings.push new Rivets[ binding ] @, node, type, keypath, formatters
 
   build: =>
     @bindings = []
