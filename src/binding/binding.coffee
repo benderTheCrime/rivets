@@ -1,7 +1,5 @@
 Rivets.Binding = class
-  constructor: (@view, @el, @type, @keypath) ->
-    @formatters = []
-    @formatterObservers = {}
+  constructor: (@view, @el, @type, @keypath, @formatters) ->
     @callbacks = @view.callbacks or {}
     @setBinder()
 
@@ -25,34 +23,15 @@ Rivets.Binding = class
 
   formattedValue: (value) =>
     if value and typeof value is 'string' and @observer
-      for match in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? [] 
+      for match in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
         keypath = match.replace /[\{\}]/g, ''
         value = value.replace match, @view.models[ keypath ] or @observer.get keypath
 
     for formatter, fi in @formatters
       args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
       id = args.shift()
-      formatter = @view.formatters[ id ]
-
-      args = (Rivets.TypeParser.parse(arg) for arg in args)
-      processedArgs = []
-
-      for arg, ai in args
-        processedArgs.push if arg.type is 0
-          arg.value
-        else
-          @formatterObservers[ fi ] or= {}
-
-          unless observer = @formatterObservers[ fi ][ ai ]
-            observer = @observe @view.models, arg.value, @sync
-            @formatterObservers[ fi ][ ai ] = observer
-
-          observer.value()
-
-      if formatter?.read instanceof Function
-        value = formatter.read.call @view.models, value, processedArgs...
-      else if formatter instanceof Function
-        value = formatter.call @view.models, value, processedArgs...
+      formatter = Rivets.formatters[ id ]
+      value = formatter value or '' if formatter instanceof Function
 
     value
 
@@ -66,9 +45,6 @@ Rivets.Binding = class
       for formatter in @formatters.slice(0).reverse()
         args = formatter.split /\s+/
         id = args.shift()
-
-        if @view.formatters[ id ]?.publish
-          value = @view.formatters[ id ].publish value, args...
 
       @observer.set value
 
@@ -85,7 +61,6 @@ Rivets.Binding = class
 
   unbind: =>
     @binder.unbind?.call @, @el
-    @formatterObservers = {}
     delete @observer
 
   update: (models = {}) => @binder.update?.call @, models or @sync()
