@@ -2,8 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-#### [1.5.0] - 2016-06-02
-##### Changed
+### [1.6.0] - 2016-06-10
+#### Changed/Fixed
+- `cb-html` now creates a sub-view containing the elements added to the root by
+the bound value
+- Added fixes for templated string value replacement
+
+### [1.5.0] - 2016-06-02
+#### Changed
 - Fixed and simplified the way that formatters work. Formatters are functions
 that take a value and parse it before its value is set
 

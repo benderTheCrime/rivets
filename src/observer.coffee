@@ -4,11 +4,10 @@ Observer = Rivets.Observer = class
     @keypath = keypath unless @keypath
     keys = keypath.split '.'
     key = keys.pop()
-
     parentKeypath = keys.join '.'
     parentValue = @walkObjectKeypath @obj, parentKeypath
-
     callbacks = @callbacks[ keypath ] ?= []
+
     callbacks.push callback if callback
 
     if !parentValue
@@ -26,7 +25,7 @@ Observer = Rivets.Observer = class
           value = newValue
           for key, _ of @callbacks
             if key.indexOf(keypath) > -1
-              for cb in @callbacks[ key ]
+              for cb in _
                 @observe @obj, key
                 cb()
 
@@ -39,8 +38,8 @@ Observer = Rivets.Observer = class
             response
          ) value[ fn ]
 
-  get: () -> @walkObjectKeypath.call @, @obj, @keypath
-  set: (value) -> @walkObjectKeypath.call @, @obj, @keypath, value
+  get: () -> @walkObjectKeypath @obj, @keypath
+  set: (value) -> @walkObjectKeypath @obj, @keypath, value
 
   walkObjectKeypath: (obj = {}, keypath, value) ->
     val = obj

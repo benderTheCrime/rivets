@@ -3,9 +3,21 @@ binders = Rivets.binders = {}
 binders.text = (el, value = '') ->
   el[ if el.textContent then 'textContent' else 'innerText' ] = value
 
-binders.html = (el, value) ->
-  return binders.text el, value if typeof value is 'string'
-  el.innerHTML = value.outerHTML if value instanceof HTMLElement
+binders.html =
+  priority: 4000,
+  publishes: true,
+  routine: (el, value) ->
+    return binders.text el, value if typeof value is 'string'
+
+    if value instanceof HTMLElement
+      @nested = new Rivets.View value, @view.models, @view.callbacks
+
+      @nested.bind()
+      el.appendChild value
+  unbind: (el) ->
+    if @nested and typeof @nested.unbind is 'function'
+      @nested.unbind()
+      el.removeChild child for child in @nested.els
 
 binders.show = (el, value) -> el.style.display = if value then '' else 'none'
 binders.hide = (el, value) -> el.style.display = if value then 'none' else ''
@@ -62,7 +74,7 @@ binders.if =
     if !!value is not @bound
       if value
 
-        (@nested = new Rivets.View el, @view.models).bind()
+        (@nested = new Rivets.View el, @view.models, @view.callbacks).bind()
         @marker.parentNode.insertBefore el, @marker.nextSibling
         @bound = true
       else
@@ -123,13 +135,13 @@ binders[ 'each-*' ] =
 
       unless @iterated[ index ]
         template = el.cloneNode true
-        view = new Rivets.View template, data
+        view = new Rivets.View template, data, @view.callbacks
         previous = if @iterated[ index - 1 ] then @iterated[ index - 1 ].els[ 0 ] else @marker
 
         @marker.parentNode.insertBefore template, previous.nextSibling
         @iterated.push view
       else
-        view = new Rivets.View @iterated[ index ].els[ 0 ], data
+        view = new Rivets.View @iterated[ index ].els[ 0 ], data, @view.callbacks
 
         @iterated[ index ].unbind()
         @iterated[ index ] = view

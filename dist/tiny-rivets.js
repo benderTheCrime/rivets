@@ -72,11 +72,10 @@
                 _ = ref[key];
                 if (key.indexOf(keypath) > -1) {
                   results.push((function() {
-                    var i, len, ref1, results1;
-                    ref1 = this.callbacks[key];
+                    var i, len, results1;
                     results1 = [];
-                    for (i = 0, len = ref1.length; i < len; i++) {
-                      cb = ref1[i];
+                    for (i = 0, len = _.length; i < len; i++) {
+                      cb = _[i];
                       this.observe(this.obj, key);
                       results1.push(cb());
                     }
@@ -115,11 +114,11 @@
     };
 
     _Class.prototype.get = function() {
-      return this.walkObjectKeypath.call(this, this.obj, this.keypath);
+      return this.walkObjectKeypath(this.obj, this.keypath);
     };
 
     _Class.prototype.set = function(value) {
-      return this.walkObjectKeypath.call(this, this.obj, this.keypath, value);
+      return this.walkObjectKeypath(this.obj, this.keypath, value);
     };
 
     _Class.prototype.walkObjectKeypath = function(obj, keypath, value) {
@@ -471,7 +470,8 @@
         for (i = 0, len = ref1.length; i < len; i++) {
           match = ref1[i];
           keypath = match.replace(/[\{\}]/g, '');
-          value = value.replace(match, this.view.models[keypath] || this.observer.get(keypath));
+          value = value.replace(match, this.observer.walkObjectKeypath(this.observer.obj, keypath) || '');
+          this.observer.observe(this.observer.obj, keypath, this.sync);
         }
       }
       ref2 = this.formatters;
@@ -594,12 +594,31 @@
     return el[el.textContent ? 'textContent' : 'innerText'] = value;
   };
 
-  binders.html = function(el, value) {
-    if (typeof value === 'string') {
-      return binders.text(el, value);
-    }
-    if (value instanceof HTMLElement) {
-      return el.innerHTML = value.outerHTML;
+  binders.html = {
+    priority: 4000,
+    publishes: true,
+    routine: function(el, value) {
+      if (typeof value === 'string') {
+        return binders.text(el, value);
+      }
+      if (value instanceof HTMLElement) {
+        this.nested = new Rivets.View(value, this.view.models, this.view.callbacks);
+        this.nested.bind();
+        return el.appendChild(value);
+      }
+    },
+    unbind: function(el) {
+      var child, i, len, ref, results;
+      if (this.nested && typeof this.nested.unbind === 'function') {
+        this.nested.unbind();
+        ref = this.nested.els;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          child = ref[i];
+          results.push(el.removeChild(child));
+        }
+        return results;
+      }
     }
   };
 
@@ -685,7 +704,7 @@
     routine: function(el, value) {
       if (!!value === !this.bound) {
         if (value) {
-          (this.nested = new Rivets.View(el, this.view.models)).bind();
+          (this.nested = new Rivets.View(el, this.view.models, this.view.callbacks)).bind();
           this.marker.parentNode.insertBefore(el, this.marker.nextSibling);
           return this.bound = true;
         } else {
@@ -783,12 +802,12 @@
         data[modelName] = model;
         if (!this.iterated[index]) {
           template = el.cloneNode(true);
-          view = new Rivets.View(template, data);
+          view = new Rivets.View(template, data, this.view.callbacks);
           previous = this.iterated[index - 1] ? this.iterated[index - 1].els[0] : this.marker;
           this.marker.parentNode.insertBefore(template, previous.nextSibling);
           this.iterated.push(view);
         } else {
-          view = new Rivets.View(this.iterated[index].els[0], data);
+          view = new Rivets.View(this.iterated[index].els[0], data, this.view.callbacks);
           this.iterated[index].unbind();
           this.iterated[index] = view;
         }
