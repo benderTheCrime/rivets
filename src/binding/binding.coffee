@@ -22,8 +22,6 @@ Rivets.Binding = class
     observer
 
   formattedValue: (value) =>
-    originalValue = value
-
     if value and typeof value is 'string' and @observer
       for match in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
         keypath = match.replace /[\{\}]/g, ''

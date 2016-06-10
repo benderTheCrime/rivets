@@ -464,8 +464,7 @@
     };
 
     _Class.prototype.formattedValue = function(value) {
-      var args, fi, formatter, i, id, j, keypath, len, len1, match, originalValue, ref, ref1, ref2;
-      originalValue = value;
+      var args, fi, formatter, i, id, j, keypath, len, len1, match, ref, ref1, ref2;
       if (value && typeof value === 'string' && this.observer) {
         ref1 = (ref = value.match(Rivets.STRING_TEMPLATE_REGEXP)) != null ? ref : [];
         for (i = 0, len = ref1.length; i < len; i++) {
@@ -603,16 +602,16 @@
         return binders.text(el, value);
       }
       if (value instanceof HTMLElement) {
-        this._ = new Rivets.View(value, this.view.models, this.view.callbacks);
-        this._.bind();
+        this.nested = new Rivets.View(value, this.view.models, this.view.callbacks);
+        this.nested.bind();
         return el.appendChild(value);
       }
     },
     unbind: function(el) {
       var child, i, len, ref, results;
-      if (this._ && typeof this._.unbind === 'function') {
-        this._.unbind();
-        ref = this._.els;
+      if (this.nested && typeof this.nested.unbind === 'function') {
+        this.nested.unbind();
+        ref = this.nested.els;
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           child = ref[i];

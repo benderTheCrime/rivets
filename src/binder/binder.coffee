@@ -10,14 +10,14 @@ binders.html =
     return binders.text el, value if typeof value is 'string'
 
     if value instanceof HTMLElement
-      @_ = new Rivets.View value, @view.models, @view.callbacks
+      @nested = new Rivets.View value, @view.models, @view.callbacks
 
-      @_.bind()
+      @nested.bind()
       el.appendChild value
   unbind: (el) ->
-    if @_ and typeof @_.unbind is 'function'
-      @_.unbind()
-      el.removeChild child for child in @_.els
+    if @nested and typeof @nested.unbind is 'function'
+      @nested.unbind()
+      el.removeChild child for child in @nested.els
 
 binders.show = (el, value) -> el.style.display = if value then '' else 'none'
 binders.hide = (el, value) -> el.style.display = if value then 'none' else ''
@@ -71,7 +71,6 @@ binders.if =
 
   unbind: -> @nested?.unbind()
   routine: (el, value) ->
-    # debugger
     if !!value is not @bound
       if value
 
