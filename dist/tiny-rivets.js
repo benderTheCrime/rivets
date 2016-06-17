@@ -7,6 +7,7 @@
 
   Rivets = {
     STRING_TEMPLATE_REGEXP: /\{{1,2}\s*?([a-z0-9\.]+)\s*?\}{1,2}/gi,
+    FORMATTER_PIPES_REGEXP: /((?:'[^']*')*(?:(?:[^\|']+(?:'[^']*')*[^\|']*)+|[^\|]+))|^$/g,
     formatters: {
       call: function() {
         var args, value;
@@ -182,29 +183,11 @@
     };
 
     _Class.prototype.buildBinding = function(binding, node, type, declaration) {
-      var context, ctx, formatters, keypath, pipe;
-      formatters = (function() {
-        var i, len, ref, results;
-        ref = declaration.match(/((?:'[^']*')*(?:(?:[^\|']+(?:'[^']*')*[^\|']*)+|[^\|]+))|^$/g);
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          pipe = ref[i];
-          results.push(pipe.trim());
-        }
-        return results;
-      })();
-      context = (function() {
-        var i, len, ref, results;
-        ref = formatters.shift().split('<');
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          ctx = ref[i];
-          results.push(ctx.trim());
-        }
-        return results;
-      })();
-      keypath = context.shift();
-      return this.bindings.push(new Rivets[binding](this, node, type, keypath, formatters));
+      return this.bindings.push((function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return Object(result) === result ? result : child;
+      })(Rivets[binding], [this, node, type].concat(slice.call(Rivets.View.parseDeclaration(declaration))), function(){}));
     };
 
     _Class.prototype.build = function() {
@@ -350,6 +333,27 @@
       return results;
     };
 
+    _Class.parseDeclaration = function(declaration) {
+      var ctx, formatters, i, len, pipe, ref;
+      ref = declaration.match(Rivets.FORMATTER_PIPE_REGEXP);
+      for (i = 0, len = ref.length; i < len; i++) {
+        pipe = ref[i];
+        formatters = pipe.trim();
+      }
+      return [
+        ((function() {
+          var j, len1, ref1, results;
+          ref1 = formatters.shift().split('<');
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            ctx = ref1[j];
+            results.push(ctx.trim());
+          }
+          return results;
+        })()).shift(), formatters
+      ];
+    };
+
     return _Class;
 
   })();
@@ -425,7 +429,7 @@
       this.sync = bind(this.sync, this);
       this.set = bind(this.set, this);
       this.eventHandler = bind(this.eventHandler, this);
-      this.formattedValue = bind(this.formattedValue, this);
+      this.templatedValue = bind(this.templatedValue, this);
       this.observe = bind(this.observe, this);
       this.setBinder = bind(this.setBinder, this);
       this.callbacks = this.view.callbacks || {};
@@ -463,28 +467,18 @@
       return observer;
     };
 
-    _Class.prototype.formattedValue = function(value) {
-      var args, fi, formatter, i, id, j, keypath, len, len1, match, ref, ref1, ref2;
+    _Class.prototype.templatedValue = function(value) {
+      var declaration, formatters, i, keypath, len, ref, ref1, ref2;
       if (value && typeof value === 'string' && this.observer) {
         ref1 = (ref = value.match(Rivets.STRING_TEMPLATE_REGEXP)) != null ? ref : [];
         for (i = 0, len = ref1.length; i < len; i++) {
-          match = ref1[i];
-          keypath = match.replace(/[\{\}]/g, '');
-          value = value.replace(match, this.observer.walkObjectKeypath(this.observer.obj, keypath) || '');
+          declaration = ref1[i];
+          ref2 = this.Rivets.View.parseDeclaration(declaration), keypath = ref2[0], formatters = ref2[1];
+          value = value.replace(match, Rivets.Binding.formattedValue(this.observer.walkObjectKeypath(this.observer.obj, keypath) || '', formatters));
           this.observer.observe(this.observer.obj, keypath, this.sync);
         }
       }
-      ref2 = this.formatters;
-      for (fi = j = 0, len1 = ref2.length; j < len1; fi = ++j) {
-        formatter = ref2[fi];
-        args = formatter.match(/[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g);
-        id = args.shift();
-        formatter = Rivets.formatters[id];
-        if (formatter instanceof Function) {
-          value = formatter(value || '');
-        }
-      }
-      return value;
+      return Rivets.Binding.formattedValue(value);
     };
 
     _Class.prototype.eventHandler = function(fn) {
@@ -497,7 +491,7 @@
 
     _Class.prototype.set = function(value) {
       var ref;
-      return (ref = this.binder.routine) != null ? ref.call(this, this.el, this.formattedValue(value)) : void 0;
+      return (ref = this.binder.routine) != null ? ref.call(this, this.el, this.templatedValue(value)) : void 0;
     };
 
     _Class.prototype.sync = function() {
@@ -562,6 +556,20 @@
       } else {
         return el.value;
       }
+    };
+
+    _Class.formattedValue = function(value, formatters) {
+      var args, fi, formatter, i, id, len;
+      for (fi = i = 0, len = formatters.length; i < len; fi = ++i) {
+        formatter = formatters[fi];
+        args = formatter.match(/[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g);
+        id = args.shift();
+        formatter = Rivets.formatters[id];
+        if (formatter instanceof Function) {
+          value = formatter(value || '');
+        }
+      }
+      return value;
     };
 
     return _Class;
