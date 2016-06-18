@@ -24,12 +24,12 @@ Rivets.Binding = class
   templatedValue: (value) =>
     if value and typeof value is 'string' and @observer
       for declaration in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
-        [ keypath, formatters ] = @Rivets.View.parseDeclaration declaration
-        value = value.replace match, Rivets.Binding.formattedValue(@observer.walkObjectKeypath(@observer.obj, keypath) or '', formatters)
+        [ keypath, formatters ] = Rivets.View.parseDeclaration declaration.replace /[\{\}]/g, ''
+        value = value.replace declaration, Rivets.Binding.formattedValue(@observer.walkObjectKeypath(@observer.obj, keypath) or '', formatters)
 
         @observer.observe @observer.obj, keypath, @sync
 
-    Rivets.Binding.formattedValue value
+    Rivets.Binding.formattedValue value, @formatters
 
   eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
   set: (value) => @binder.routine?.call @, @el, @templatedValue value

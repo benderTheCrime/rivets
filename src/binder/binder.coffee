@@ -4,8 +4,7 @@ binders.text = (el, value = '') ->
   el[ if el.textContent then 'textContent' else 'innerText' ] = value
 
 binders.html =
-  priority: 4000,
-  publishes: true,
+  priority: 4000
   routine: (el, value) ->
     return binders.text el, value if typeof value is 'string'
 

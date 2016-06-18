@@ -38,7 +38,7 @@ Rivets.View = class
 
         if binder.block
           block = true
-          attributes = [attribute]
+          attributes = [ attribute ]
 
     for attribute in attributes or node.attributes
       if bindingRegExp.test attribute.name
@@ -56,5 +56,5 @@ Rivets.View = class
     binding.update? models for binding in @bindings
 
   @parseDeclaration: (declaration) ->
-    formatters = pipe.trim() for pipe in declaration.match Rivets.FORMATTER_PIPE_REGEXP
-    [ (ctx.trim() for ctx in formatters.shift().split '<').shift(), formatters ]
+    formatters = (pipe.trim() for pipe in declaration.match Rivets.FORMATTER_PIPE_REGEXP)
+    [ formatters.shift(), formatters ]
