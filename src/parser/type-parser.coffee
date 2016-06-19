@@ -1,30 +1,19 @@
 Rivets.TypeParser = class
-  @types:
-    primitive: 0
-    keypath: 1
+  @parse: (str) ->
+    obj = type: 0, value: undefined
 
-  @parse: (string) ->
-      if /^'.*'$|^".*"$/.test string
-        type: @types.primitive
-        value: string.slice 1, -1
-      else if string is 'true'
-        type: @types.primitive
-        value: true
-      else if string is 'false'
-        type: @types.primitive
-        value: false
-      else if string is 'null'
-        type: @types.primitive
-        value: null
-      else if string is 'undefined'
-        type: @types.primitive
-        value: undefined
-      else if string is ''
-        type: @types.primitive
-        value: undefined
-      else if isNaN(Number(string)) is false
-        type: @types.primitive
-        value: Number string
-      else
-        type: @types.keypath
-        value: string
+    if /^'.*'$|^".*"$/.test str
+      obj.value = str.slice 1, -1
+    else if str is 'true'
+      obj.value = true
+    else if str is 'false'
+      obj.value = false
+    else if str is 'null'
+      obj.value = null
+    else if isNaN(Number str) is false
+      obj.value = Number str
+    else unless str is 'undefined' or str is ''
+      obj.type = 1
+      obj.value = str
+
+    obj

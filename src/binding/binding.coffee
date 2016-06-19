@@ -1,9 +1,7 @@
-Rivets.Binding = class
+Binding = Rivets.Binding = class
   constructor: (@view, @el, @type, @keypath, @formatters) ->
     @callbacks = @view.callbacks or {}
-    @setBinder()
 
-  setBinder: =>
     unless @binder = @view.binders[ @type ]
       for identifier, value of @view.binders
         if identifier isnt '*' and identifier.indexOf('*') isnt -1
@@ -17,28 +15,21 @@ Rivets.Binding = class
     @binder = { routine: @binder } if @binder instanceof Function
 
   observe: (obj, keypath, callback) =>
-    observer = new Observer @callbacks
-    observer.observe arguments...
+    (observer = new Observer @callbacks).observe arguments...
     observer
 
-  formattedValue: (value) =>
+  templatedValue: (value) =>
     if value and typeof value is 'string' and @observer
-      for match in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
-        keypath = match.replace /[\{\}]/g, ''
-        value = value.replace match, @observer.walkObjectKeypath(@observer.obj, keypath) or ''
+      for declaration in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
+        [ keypath, formatters ] = View.parseDeclaration declaration.replace /[\{\}]/g, ''
+        value = value.replace declaration, Binding.formattedValue(@observer.walkObjectKeypath(@observer.obj, keypath) or '', formatters)
 
         @observer.observe @observer.obj, keypath, @sync
 
-    for formatter, fi in @formatters
-      args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
-      id = args.shift()
-      formatter = Rivets.formatters[ id ]
-      value = formatter value or '' if formatter instanceof Function
-
-    value
+    Binding.formattedValue value, @formatters
 
   eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
-  set: (value) => @binder.routine?.call @, @el, @formattedValue value
+  set: (value) => @binder.routine?.call @, @el, @templatedValue value
   sync: => @set if @observer then @observer.get()
   publish: =>
     if @observer
@@ -74,3 +65,12 @@ Rivets.Binding = class
       @getInputValue el
 
   getInputValue: (el) -> if el.type is 'checkbox' then el.checked else el.value
+
+  @formattedValue: (value, formatters) =>
+    for formatter, fi in formatters
+      args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
+      id = args.shift()
+      formatter = Rivets.formatters[ id ]
+      value = formatter value or '' if formatter instanceof Function
+
+    value

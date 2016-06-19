@@ -1,4 +1,4 @@
-Rivets.View = class
+View = Rivets.View = class
   constructor: (@els, @models, @callbacks = {}) ->
     @els = [ @els ] unless @els instanceof Array
     @binders = Rivets.binders
@@ -6,11 +6,7 @@ Rivets.View = class
 
   bindingRegExp: => new RegExp "^cb-"
   buildBinding: (binding, node, type, declaration) =>
-    formatters = (pipe.trim() for pipe in declaration.match /((?:'[^']*')*(?:(?:[^\|']+(?:'[^']*')*[^\|']*)+|[^\|]+))|^$/g)
-    context = (ctx.trim() for ctx in formatters.shift().split '<')
-    keypath = context.shift()
-
-    @bindings.push new Rivets[ binding ] @, node, type, keypath, formatters
+    @bindings.push new Rivets[ binding ] @, node, type, View.parseDeclaration(declaration)...
 
   build: =>
     @bindings = []
@@ -31,7 +27,7 @@ Rivets.View = class
       if bindingRegExp.test attribute.name
         type = attribute.name.replace bindingRegExp, ''
 
-        unless binder = @binders[type]
+        unless binder = @binders[ type ]
           for identifier, value of @binders
             if identifier isnt '*' and identifier.indexOf('*') isnt -1
               regexp = new RegExp "^#{identifier.replace(/\*/g, '.+')}$"
@@ -42,7 +38,7 @@ Rivets.View = class
 
         if binder.block
           block = true
-          attributes = [attribute]
+          attributes = [ attribute ]
 
     for attribute in attributes or node.attributes
       if bindingRegExp.test attribute.name
@@ -58,3 +54,7 @@ Rivets.View = class
   update: (models = {}) =>
     @models[ key ] = model for key, model of models
     binding.update? models for binding in @bindings
+
+  @parseDeclaration: (declaration) ->
+    formatters = (pipe.trim() for pipe in declaration.match Rivets.FORMATTER_PIPE_REGEXP)
+    [ formatters.shift(), formatters ]

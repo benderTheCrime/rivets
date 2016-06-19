@@ -21,7 +21,7 @@ const SRC = [
 gulp.task('build', function() {
     gulp.src([ './src/binder/**.coffee', '!./src/binder/binder.coffee' ])
         .pipe(rename({ ext: '.js' }))
-        .pipe(coffee().on('error', util.log))
+        .pipe(coffee({ bare: true }).on('error', util.log))
         .pipe(gulp.dest('dist/binder'));
 
     return gulp.src(SRC)
