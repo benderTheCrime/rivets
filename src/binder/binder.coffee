@@ -4,8 +4,7 @@ binders.text = (el, value = '') ->
   el[ if el.textContent then 'textContent' else 'innerText' ] = value
 
 binders.html =
-  priority: 4000,
-  publishes: true,
+  priority: 4000
   routine: (el, value) ->
     return binders.text el, value if typeof value is 'string'
 
@@ -55,7 +54,7 @@ binders.value =
 
 binders.if =
   block: true
-  priority: 4000
+  priority: 5000
 
   bind: (el) ->
     unless @marker?
@@ -86,7 +85,7 @@ binders.if =
 
 binders.unless =
   block: true
-  priority: 4000
+  priority: 5000
 
   bind: (el) -> binders.if.bind.call @, el
   unbind: -> binders.if.unbind.call @
@@ -115,9 +114,8 @@ binders[ 'each-*' ] =
       el.removeAttribute attr
       el.parentNode.insertBefore @marker, el
       el.parentNode.removeChild el
-    else
-      for view in @iterated
-        view.bind()
+    else view.bind() for view in @iterated
+
 
   unbind: (el) -> view.unbind() for view in @iterated if @iterated?
   routine: (el, collection) ->
@@ -165,9 +163,4 @@ binders[ 'class-*' ] = (el, value) ->
       elClass.replace(" #{@args[0]} ", ' ').trim()
 
 binders[ 'no-class-*' ] = (el, value) -> binders[ 'class-*' ].call @, el, not value
-
-binders[ '*' ] = (el, value) ->
-  if value?
-    el.setAttribute @type, value
-  else
-    el.removeAttribute @type
+binders[ '*' ] = (el, value) -> el[ if value then 'setAttribute' else 'removeAttribute' ] type, value
