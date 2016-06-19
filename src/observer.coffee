@@ -38,12 +38,10 @@ Observer = Rivets.Observer = class
             response
          ) value[ fn ]
 
-    @
-
   get: () -> @walkObjectKeypath @obj, @keypath
   set: (value) -> @walkObjectKeypath @obj, @keypath, value
 
-  walkObjectKeypath: (obj = {}, keypath = '', value) ->
+  walkObjectKeypath: (obj = {}, keypath, value) ->
     val = obj
 
     if keypath
@@ -63,4 +61,5 @@ Observer = Rivets.Observer = class
             val = val[ key ]
           else
             val = {}
+
     val

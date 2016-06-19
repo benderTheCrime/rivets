@@ -14,7 +14,10 @@ Binding = Rivets.Binding = class
     @binder or= @view.binders[ '*' ]
     @binder = { routine: @binder } if @binder instanceof Function
 
-  observe: (obj, keypath, callback) => new Observer(@callbacks).observe arguments...
+  observe: (obj, keypath, callback) =>
+    (observer = new Observer @callbacks).observe arguments...
+    observer
+
   templatedValue: (value) =>
     if value and typeof value is 'string' and @observer
       for declaration in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []

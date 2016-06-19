@@ -37,7 +37,7 @@
     }
 
     _Class.prototype.observe = function(obj1, keypath, callback) {
-      var base, callbacks, fn, fn1, i, key, keys, len, parentKeypath, parentValue, ref, value;
+      var base, callbacks, fn, i, key, keys, len, parentKeypath, parentValue, ref, results, value;
       this.obj = obj1;
       if (!this.keypath) {
         this.keypath = keypath;
@@ -92,25 +92,25 @@
       });
       if (Array.isArray(value)) {
         ref = ['push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice'];
-        fn1 = (function(_this) {
-          return function(original) {
-            return value[fn] = function() {
-              var cb, j, len1, response;
-              response = original.apply(value, arguments);
-              for (j = 0, len1 = callbacks.length; j < len1; j++) {
-                cb = callbacks[j];
-                cb();
-              }
-              return response;
-            };
-          };
-        })(this);
+        results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           fn = ref[i];
-          fn1(value[fn]);
+          results.push(((function(_this) {
+            return function(original) {
+              return value[fn] = function() {
+                var cb, j, len1, response;
+                response = original.apply(value, arguments);
+                for (j = 0, len1 = callbacks.length; j < len1; j++) {
+                  cb = callbacks[j];
+                  cb();
+                }
+                return response;
+              };
+            };
+          })(this))(value[fn]));
         }
+        return results;
       }
-      return this;
     };
 
     _Class.prototype.get = function() {
@@ -125,9 +125,6 @@
       var i, key, keys, lastKey, len, val;
       if (obj == null) {
         obj = {};
-      }
-      if (keypath == null) {
-        keypath = '';
       }
       val = obj;
       if (keypath) {
@@ -426,8 +423,9 @@
     }
 
     _Class.prototype.observe = function(obj, keypath, callback) {
-      var ref;
-      return (ref = new Observer(this.callbacks)).observe.apply(ref, arguments);
+      var observer, ref;
+      (ref = (observer = new Observer(this.callbacks))).observe.apply(ref, arguments);
+      return observer;
     };
 
     _Class.prototype.templatedValue = function(value) {
@@ -654,7 +652,7 @@
 
   binders["if"] = {
     block: true,
-    priority: 4000,
+    priority: 5000,
     bind: function(el) {
       var attr, declaration;
       if (this.marker == null) {
@@ -692,7 +690,7 @@
 
   binders.unless = {
     block: true,
-    priority: 4000,
+    priority: 5000,
     bind: function(el) {
       return binders["if"].bind.call(this, el);
     },

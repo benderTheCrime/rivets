@@ -54,7 +54,7 @@ binders.value =
 
 binders.if =
   block: true
-  priority: 4000
+  priority: 5000
 
   bind: (el) ->
     unless @marker?
@@ -85,7 +85,7 @@ binders.if =
 
 binders.unless =
   block: true
-  priority: 4000
+  priority: 5000
 
   bind: (el) -> binders.if.bind.call @, el
   unbind: -> binders.if.unbind.call @
