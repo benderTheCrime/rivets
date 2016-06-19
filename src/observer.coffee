@@ -38,10 +38,12 @@ Observer = Rivets.Observer = class
             response
          ) value[ fn ]
 
+    @
+
   get: () -> @walkObjectKeypath @obj, @keypath
   set: (value) -> @walkObjectKeypath @obj, @keypath, value
 
-  walkObjectKeypath: (obj = {}, keypath, value) ->
+  walkObjectKeypath: (obj = {}, keypath = '', value) ->
     val = obj
 
     if keypath
@@ -53,11 +55,11 @@ Observer = Rivets.Observer = class
           if key is lastKey
             if value or value is false or value is ''
               val = val[ key ] = value
-            else if val[key]?
+            else if val[ key ]
               val = val[ key ]
             else
               val = null
-          else if val[ key ]?
+          else if val[ key ]
             val = val[ key ]
           else
             val = {}

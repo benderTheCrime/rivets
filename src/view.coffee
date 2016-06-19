@@ -1,4 +1,4 @@
-Rivets.View = class
+View = Rivets.View = class
   constructor: (@els, @models, @callbacks = {}) ->
     @els = [ @els ] unless @els instanceof Array
     @binders = Rivets.binders
@@ -27,7 +27,7 @@ Rivets.View = class
       if bindingRegExp.test attribute.name
         type = attribute.name.replace bindingRegExp, ''
 
-        unless binder = @binders[type]
+        unless binder = @binders[ type ]
           for identifier, value of @binders
             if identifier isnt '*' and identifier.indexOf('*') isnt -1
               regexp = new RegExp "^#{identifier.replace(/\*/g, '.+')}$"

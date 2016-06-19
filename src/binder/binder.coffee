@@ -114,9 +114,8 @@ binders[ 'each-*' ] =
       el.removeAttribute attr
       el.parentNode.insertBefore @marker, el
       el.parentNode.removeChild el
-    else
-      for view in @iterated
-        view.bind()
+    else view.bind() for view in @iterated
+
 
   unbind: (el) -> view.unbind() for view in @iterated if @iterated?
   routine: (el, collection) ->
@@ -164,9 +163,4 @@ binders[ 'class-*' ] = (el, value) ->
       elClass.replace(" #{@args[0]} ", ' ').trim()
 
 binders[ 'no-class-*' ] = (el, value) -> binders[ 'class-*' ].call @, el, not value
-
-binders[ '*' ] = (el, value) ->
-  if value?
-    el.setAttribute @type, value
-  else
-    el.removeAttribute @type
+binders[ '*' ] = (el, value) -> el[ if value then 'setAttribute' else 'removeAttribute' ] type, value

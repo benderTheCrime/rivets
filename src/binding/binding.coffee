@@ -1,9 +1,7 @@
-Rivets.Binding = class
+Binding = Rivets.Binding = class
   constructor: (@view, @el, @type, @keypath, @formatters) ->
     @callbacks = @view.callbacks or {}
-    @setBinder()
 
-  setBinder: =>
     unless @binder = @view.binders[ @type ]
       for identifier, value of @view.binders
         if identifier isnt '*' and identifier.indexOf('*') isnt -1
@@ -16,20 +14,16 @@ Rivets.Binding = class
     @binder or= @view.binders[ '*' ]
     @binder = { routine: @binder } if @binder instanceof Function
 
-  observe: (obj, keypath, callback) =>
-    observer = new Observer @callbacks
-    observer.observe arguments...
-    observer
-
+  observe: (obj, keypath, callback) => new Observer(@callbacks).observe arguments...
   templatedValue: (value) =>
     if value and typeof value is 'string' and @observer
       for declaration in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
-        [ keypath, formatters ] = Rivets.View.parseDeclaration declaration.replace /[\{\}]/g, ''
-        value = value.replace declaration, Rivets.Binding.formattedValue(@observer.walkObjectKeypath(@observer.obj, keypath) or '', formatters)
+        [ keypath, formatters ] = View.parseDeclaration declaration.replace /[\{\}]/g, ''
+        value = value.replace declaration, Binding.formattedValue(@observer.walkObjectKeypath(@observer.obj, keypath) or '', formatters)
 
         @observer.observe @observer.obj, keypath, @sync
 
-    Rivets.Binding.formattedValue value, @formatters
+    Binding.formattedValue value, @formatters
 
   eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
   set: (value) => @binder.routine?.call @, @el, @templatedValue value
