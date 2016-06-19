@@ -25,7 +25,7 @@
       if (models == null) {
         models = {};
       }
-      (view = new Rivets.View(el, models)).bind();
+      (view = new View(el, models)).bind();
       return view;
     }
   };
@@ -189,7 +189,7 @@
         ctor.prototype = func.prototype;
         var child = new ctor, result = func.apply(child, args);
         return Object(result) === result ? result : child;
-      })(Rivets[binding], [this, node, type].concat(slice.call(Rivets.View.parseDeclaration(declaration))), function(){}));
+      })(Rivets[binding], [this, node, type].concat(slice.call(View.parseDeclaration(declaration))), function(){}));
     };
 
     _Class.prototype.build = function() {

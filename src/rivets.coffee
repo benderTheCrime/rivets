@@ -5,5 +5,5 @@ Rivets =
   handler: (instance, event, binding) ->
     @call(binding.view.models, event, event.target, binding.view.models) if @
   bind: (el, models = {}) ->
-    (view = new Rivets.View el, models).bind()
+    (view = new View el, models).bind()
     view

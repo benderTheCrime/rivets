@@ -6,7 +6,7 @@ View = Rivets.View = class
 
   bindingRegExp: => new RegExp "^cb-"
   buildBinding: (binding, node, type, declaration) =>
-    @bindings.push new Rivets[ binding ] @, node, type, Rivets.View.parseDeclaration(declaration)...
+    @bindings.push new Rivets[ binding ] @, node, type, View.parseDeclaration(declaration)...
 
   build: =>
     @bindings = []
