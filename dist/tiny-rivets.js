@@ -811,7 +811,7 @@
   };
 
   binders['*'] = function(el, value) {
-    return el[value ? 'setAttribute' : 'removeAttribute'](type, value);
+    return el[value ? 'setAttribute' : 'removeAttribute'](this.type, value);
   };
 
   module.exports = Rivets;
