@@ -163,4 +163,4 @@ binders[ 'class-*' ] = (el, value) ->
       elClass.replace(" #{@args[0]} ", ' ').trim()
 
 binders[ 'no-class-*' ] = (el, value) -> binders[ 'class-*' ].call @, el, not value
-binders[ '*' ] = (el, value) -> el[ if value then 'setAttribute' else 'removeAttribute' ] type, value
+binders[ '*' ] = (el, value) -> el[ if value then 'setAttribute' else 'removeAttribute' ] @type, value

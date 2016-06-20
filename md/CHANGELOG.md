@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### [1.7.1] - 2016-06-20
+#### Fixed
+- Fixed an issue with the `*` binder and the scoping of `type`
+
 ### [1.7.0] - 2016-06-19
 #### Added
 - Added the ability to use formatter functions in tandem with template strings
