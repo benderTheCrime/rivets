@@ -30,7 +30,7 @@
     }
   };
 
-  Observer = Rivets.Observer = (function() {
+  module.exports = Observer = Rivets.Observer = (function() {
     function _Class(callbacks1) {
       this.callbacks = callbacks1 != null ? callbacks1 : {};
       this;
@@ -148,8 +148,6 @@
     return _Class;
 
   })();
-
-  module.exports = Observer;
 
   View = Rivets.View = (function() {
     function _Class(els, models1, callbacks1) {

@@ -38,10 +38,3 @@ describe 'Observer', ->
           expect(Observer.prototype.walkObjectKeypath obj, 'qux.quux', 'foo').to.equal 'foo'
         it 'lower level set', ->
           expect(Observer.prototype.walkObjectKeypath obj, 'baz.bing', 'foo').to.equal 'foo'
-
-
-# Test shallow not found
-# Test deep not found
-# Test shallow found
-# Test deep found
-# Test set

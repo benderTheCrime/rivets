@@ -2,6 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.3] - 2016-07-13
+### Added
+- n/a
+
+### Changed
+- Made `Observer.prototype.walkObjectKeypath` use `Array.prototype.reduce`
+
+### Fixed
+- n/a
+
+### Removed
+- n/a
+
 ## [1.7.2] - 2016-06-26
 ### Added
 - n/a

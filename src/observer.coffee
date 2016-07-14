@@ -1,4 +1,4 @@
-Observer = Rivets.Observer = class
+module.exports = Observer = Rivets.Observer = class
   constructor: (@callbacks = {}) -> @
   observe: (@obj, keypath, callback) ->
     @keypath = keypath unless @keypath
@@ -50,5 +50,3 @@ Observer = Rivets.Observer = class
         a[ b ] ? null
       else a[ b ] ? {}
     , obj
-
-module.exports = Observer
