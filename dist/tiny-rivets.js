@@ -37,7 +37,7 @@
     }
 
     _Class.prototype.observe = function(obj1, keypath, callback) {
-      var base, callbacks, fn, i, key, keys, len, parentKeypath, parentValue, ref, results, value;
+      var base, callbacks, fn, j, key, keys, len, parentKeypath, parentValue, ref, results, value;
       this.obj = obj1;
       if (!this.keypath) {
         this.keypath = keypath;
@@ -72,10 +72,10 @@
                 _ = ref[key];
                 if (key.indexOf(keypath) > -1) {
                   results.push((function() {
-                    var i, len, results1;
+                    var j, len, results1;
                     results1 = [];
-                    for (i = 0, len = _.length; i < len; i++) {
-                      cb = _[i];
+                    for (j = 0, len = _.length; j < len; j++) {
+                      cb = _[j];
                       this.observe(this.obj, key);
                       results1.push(cb());
                     }
@@ -93,15 +93,15 @@
       if (Array.isArray(value)) {
         ref = ['push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice'];
         results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          fn = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          fn = ref[j];
           results.push(((function(_this) {
             return function(original) {
               return value[fn] = function() {
-                var cb, j, len1, response;
+                var cb, k, len1, response;
                 response = original.apply(value, arguments);
-                for (j = 0, len1 = callbacks.length; j < len1; j++) {
-                  cb = callbacks[j];
+                for (k = 0, len1 = callbacks.length; k < len1; k++) {
+                  cb = callbacks[k];
                   cb();
                 }
                 return response;
@@ -122,39 +122,34 @@
     };
 
     _Class.prototype.walkObjectKeypath = function(obj, keypath, value) {
-      var i, key, keys, lastKey, len, val;
+      var keys;
       if (obj == null) {
         obj = {};
       }
-      val = obj;
-      if (keypath) {
-        keys = keypath.split('.');
-        lastKey = keys.slice(-1)[0];
-        if (keys.length) {
-          for (i = 0, len = keys.length; i < len; i++) {
-            key = keys[i];
-            if (key === lastKey) {
-              if (value || value === false || value === '') {
-                val = val[key] = value;
-              } else if (val[key]) {
-                val = val[key];
-              } else {
-                val = null;
-              }
-            } else if (val[key]) {
-              val = val[key];
-            } else {
-              val = {};
-            }
-          }
-        }
+      if (keypath == null) {
+        keypath = '';
       }
-      return val;
+      if (!(keypath && typeof keypath === 'string')) {
+        return obj;
+      }
+      return (keys = keypath.split('.')).reduce(function(a, b, i) {
+        var ref, ref1;
+        if (i === keys.length - 1) {
+          if (value || value === false || value === '') {
+            a[b] = value;
+          }
+          return (ref = a[b]) != null ? ref : null;
+        } else {
+          return (ref1 = a[b]) != null ? ref1 : {};
+        }
+      }, obj);
     };
 
     return _Class;
 
   })();
+
+  module.exports = Observer;
 
   View = Rivets.View = (function() {
     function _Class(els, models1, callbacks1) {
@@ -190,25 +185,25 @@
     };
 
     _Class.prototype.build = function() {
-      var el, i, len, parse, ref;
+      var el, j, len, parse, ref;
       this.bindings = [];
       parse = (function(_this) {
         return function(node) {
-          var childNode, i, len, n, ref, results;
+          var childNode, j, len, n, ref, results;
           if (!(node.nodeType === 1 ? _this.traverse(node) : null)) {
             ref = (function() {
-              var j, len, ref, results1;
+              var k, len, ref, results1;
               ref = node.childNodes;
               results1 = [];
-              for (j = 0, len = ref.length; j < len; j++) {
-                n = ref[j];
+              for (k = 0, len = ref.length; k < len; k++) {
+                n = ref[k];
                 results1.push(n);
               }
               return results1;
             })();
             results = [];
-            for (i = 0, len = ref.length; i < len; i++) {
-              childNode = ref[i];
+            for (j = 0, len = ref.length; j < len; j++) {
+              childNode = ref[j];
               results.push(parse(childNode));
             }
             return results;
@@ -216,8 +211,8 @@
         };
       })(this);
       ref = this.els;
-      for (i = 0, len = ref.length; i < len; i++) {
-        el = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        el = ref[j];
         parse(el);
       }
       return this.bindings.sort(function(a, b) {
@@ -227,12 +222,12 @@
     };
 
     _Class.prototype.traverse = function(node) {
-      var attribute, attributes, binder, bindingRegExp, block, i, identifier, j, len, len1, ref, ref1, ref2, regexp, type, value;
+      var attribute, attributes, binder, bindingRegExp, block, identifier, j, k, len, len1, ref, ref1, ref2, regexp, type, value;
       bindingRegExp = this.bindingRegExp();
       block = node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE';
       ref = node.attributes;
-      for (i = 0, len = ref.length; i < len; i++) {
-        attribute = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        attribute = ref[j];
         if (bindingRegExp.test(attribute.name)) {
           type = attribute.name.replace(bindingRegExp, '');
           if (!(binder = this.binders[type])) {
@@ -255,8 +250,8 @@
         }
       }
       ref2 = attributes || node.attributes;
-      for (j = 0, len1 = ref2.length; j < len1; j++) {
-        attribute = ref2[j];
+      for (k = 0, len1 = ref2.length; k < len1; k++) {
+        attribute = ref2[k];
         if (bindingRegExp.test(attribute.name)) {
           type = attribute.name.replace(bindingRegExp, '');
           this.buildBinding('Binding', node, type, attribute.value);
@@ -266,11 +261,11 @@
     };
 
     _Class.prototype.select = function(fn) {
-      var binding, i, len, ref, results;
+      var binding, j, len, ref, results;
       ref = this.bindings;
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        binding = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        binding = ref[j];
         if (fn(binding)) {
           results.push(binding);
         }
@@ -279,43 +274,43 @@
     };
 
     _Class.prototype.bind = function() {
-      var binding, i, len, ref, results;
+      var binding, j, len, ref, results;
       ref = this.bindings;
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        binding = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        binding = ref[j];
         results.push(binding.bind());
       }
       return results;
     };
 
     _Class.prototype.unbind = function() {
-      var binding, i, len, ref, results;
+      var binding, j, len, ref, results;
       ref = this.bindings;
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        binding = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        binding = ref[j];
         results.push(binding.unbind());
       }
       return results;
     };
 
     _Class.prototype.publish = function() {
-      var binding, i, len, ref, results;
+      var binding, j, len, ref, results;
       ref = this.select(function(b) {
         var ref;
         return (ref = b.binder) != null ? ref.publishes : void 0;
       });
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        binding = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        binding = ref[j];
         results.push(binding.publish());
       }
       return results;
     };
 
     _Class.prototype.update = function(models) {
-      var binding, i, key, len, model, ref, results;
+      var binding, j, key, len, model, ref, results;
       if (models == null) {
         models = {};
       }
@@ -325,8 +320,8 @@
       }
       ref = this.bindings;
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        binding = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        binding = ref[j];
         results.push(typeof binding.update === "function" ? binding.update(models) : void 0);
       }
       return results;
@@ -335,11 +330,11 @@
     _Class.parseDeclaration = function(declaration) {
       var formatters, pipe;
       formatters = (function() {
-        var i, len, ref, results;
+        var j, len, ref, results;
         ref = declaration.match(Rivets.FORMATTER_PIPE_REGEXP);
         results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          pipe = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          pipe = ref[j];
           results.push(pipe.trim());
         }
         return results;
@@ -429,11 +424,11 @@
     };
 
     _Class.prototype.templatedValue = function(value) {
-      var declaration, formatters, i, keypath, len, ref, ref1, ref2;
+      var declaration, formatters, j, keypath, len, ref, ref1, ref2;
       if (value && typeof value === 'string' && this.observer) {
         ref1 = (ref = value.match(Rivets.STRING_TEMPLATE_REGEXP)) != null ? ref : [];
-        for (i = 0, len = ref1.length; i < len; i++) {
-          declaration = ref1[i];
+        for (j = 0, len = ref1.length; j < len; j++) {
+          declaration = ref1[j];
           ref2 = View.parseDeclaration(declaration.replace(/[\{\}]/g, '')), keypath = ref2[0], formatters = ref2[1];
           value = value.replace(declaration, Binding.formattedValue(this.observer.walkObjectKeypath(this.observer.obj, keypath) || '', formatters));
           this.observer.observe(this.observer.obj, keypath, this.sync);
@@ -460,12 +455,12 @@
     };
 
     _Class.prototype.publish = function() {
-      var args, formatter, i, id, len, ref, value;
+      var args, formatter, id, j, len, ref, value;
       if (this.observer) {
         value = this.getValue(this.el);
         ref = this.formatters.slice(0).reverse();
-        for (i = 0, len = ref.length; i < len; i++) {
-          formatter = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          formatter = ref[j];
           args = formatter.split(/\s+/);
           id = args.shift();
         }
@@ -520,8 +515,8 @@
     };
 
     _Class.formattedValue = function(value, formatters) {
-      var args, fi, formatter, i, id, len;
-      for (fi = i = 0, len = formatters.length; i < len; fi = ++i) {
+      var args, fi, formatter, id, j, len;
+      for (fi = j = 0, len = formatters.length; j < len; fi = ++j) {
         formatter = formatters[fi];
         args = formatter.match(/[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g);
         id = args.shift();
@@ -576,13 +571,13 @@
       }
     },
     unbind: function(el) {
-      var child, i, len, ref, results;
+      var child, j, len, ref, results;
       if (this.nested && typeof this.nested.unbind === 'function') {
         this.nested.unbind();
         ref = this.nested.els;
         results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          child = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          child = ref[j];
           results.push(el.removeChild(child));
         }
         return results;
@@ -725,7 +720,7 @@
     block: true,
     priority: 4000,
     bind: function(el) {
-      var attr, i, len, ref, results, view;
+      var attr, j, len, ref, results, view;
       if (this.marker == null) {
         attr = ['cb', this.type].join('-').replace('--', '-');
         this.marker = document.createComment(" rivets: " + this.type + " ");
@@ -736,27 +731,27 @@
       } else {
         ref = this.iterated;
         results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          view = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          view = ref[j];
           results.push(view.bind());
         }
         return results;
       }
     },
     unbind: function(el) {
-      var i, len, ref, results, view;
+      var j, len, ref, results, view;
       if (this.iterated != null) {
         ref = this.iterated;
         results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          view = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          view = ref[j];
           results.push(view.unbind());
         }
         return results;
       }
     },
     routine: function(el, collection) {
-      var binding, data, i, index, j, len, len1, model, modelName, previous, ref, results, template, view;
+      var binding, data, index, j, k, len, len1, model, modelName, previous, ref, results, template, view;
       modelName = this.args[0];
       collection = collection || [];
       while (this.iterated.length > collection.length) {
@@ -764,7 +759,7 @@
         view.unbind();
         this.marker.parentNode.removeChild(view.els[0]);
       }
-      for (index = i = 0, len = collection.length; i < len; index = ++i) {
+      for (index = j = 0, len = collection.length; j < len; index = ++j) {
         model = collection[index];
         data = this.view.models;
         data[modelName] = model;
@@ -785,8 +780,8 @@
       if (el.nodeName === 'OPTION') {
         ref = this.view.bindings;
         results = [];
-        for (j = 0, len1 = ref.length; j < len1; j++) {
-          binding = ref[j];
+        for (k = 0, len1 = ref.length; k < len1; k++) {
+          binding = ref[k];
           if (binding.el === this.marker.parentNode && binding.type === 'value') {
             results.push(binding.sync());
           } else {

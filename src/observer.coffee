@@ -41,25 +41,14 @@ Observer = Rivets.Observer = class
   get: () -> @walkObjectKeypath @obj, @keypath
   set: (value) -> @walkObjectKeypath @obj, @keypath, value
 
-  walkObjectKeypath: (obj = {}, keypath, value) ->
-    val = obj
+  walkObjectKeypath: (obj = {}, keypath = '', value) ->
+    return obj unless keypath and typeof keypath is 'string'
 
-    if keypath
-      keys = keypath.split '.'
-      lastKey = keys.slice(-1)[ 0 ]
+    (keys = keypath.split('.')).reduce (a, b, i) ->
+      if i is keys.length - 1
+        a[ b ] = value if value or value is false or value is ''
+        a[ b ] ? null
+      else a[ b ] ? {}
+    , obj
 
-      if keys.length
-        for key in keys
-          if key is lastKey
-            if value or value is false or value is ''
-              val = val[ key ] = value
-            else if val[ key ]
-              val = val[ key ]
-            else
-              val = null
-          else if val[ key ]
-            val = val[ key ]
-          else
-            val = {}
-
-    val
+module.exports = Observer
