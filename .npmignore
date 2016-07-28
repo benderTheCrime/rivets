@@ -1,4 +1,7 @@
 .editorconfig
+.gitattributes
 .gitignore
 .npmignore
+.travis.yml
 md
+test

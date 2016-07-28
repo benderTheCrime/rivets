@@ -2,12 +2,14 @@
   "name": "tiny-rivets",
   "description": "A tiny RivetsJS fork",
   "version": "1.7.3",
-  "main": "dist/tiny-rivets.js",
+  "main": "lib",
   "private": false,
   "engine": {
     "node": ">=5.12.0"
   },
   "scripts": {
+    "build": "gulp",
+    "postinstall": "npm run build",
     "test": "node node_modules/.bin/mocha --compilers coffee:coffee-script/register test/src/*.coffee"
   },
   "contributors": [
