@@ -1,4 +1,8 @@
-Binding = Rivets.Binding = class
+Observer = require '../observer.coffee'
+View = require '../view.coffee'
+TypeParser = require '../parser/type-parser.coffee'
+
+module.exports = Binding = class
   constructor: (@view, @el, @type, @keypath, @formatters) ->
     @callbacks = @view.callbacks or {}
 
@@ -42,7 +46,7 @@ Binding = Rivets.Binding = class
       @observer.set value
 
   bind: =>
-    token = Rivets.TypeParser.parse @keypath
+    token = TypeParser.parse @keypath
 
     if token.type is 0
       @value = token.value

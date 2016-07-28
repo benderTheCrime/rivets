@@ -1,4 +1,4 @@
-Rivets.TypeParser = class
+module.exports = class
   @parse: (str) ->
     obj = type: 0, value: undefined
 

@@ -1,4 +1,6 @@
-binders = Rivets.binders = {}
+View = require '../view.coffee'
+
+binders = {}
 
 binders.text = (el, value = '') ->
   el[ if el.textContent then 'textContent' else 'innerText' ] = value
@@ -9,7 +11,7 @@ binders.html =
     return binders.text el, value if typeof value is 'string'
 
     if value instanceof HTMLElement
-      @nested = new Rivets.View value, @view.models, @view.callbacks
+      @nested = new View value, @view.models, @view.callbacks
 
       @nested.bind()
       el.appendChild value
@@ -73,7 +75,7 @@ binders.if =
     if !!value is not @bound
       if value
 
-        (@nested = new Rivets.View el, @view.models, @view.callbacks).bind()
+        (@nested = new View el, @view.models, @view.callbacks).bind()
         @marker.parentNode.insertBefore el, @marker.nextSibling
         @bound = true
       else
@@ -133,13 +135,13 @@ binders[ 'each-*' ] =
 
       unless @iterated[ index ]
         template = el.cloneNode true
-        view = new Rivets.View template, data, @view.callbacks
+        view = new View template, data, @view.callbacks
         previous = if @iterated[ index - 1 ] then @iterated[ index - 1 ].els[ 0 ] else @marker
 
         @marker.parentNode.insertBefore template, previous.nextSibling
         @iterated.push view
       else
-        view = new Rivets.View @iterated[ index ].els[ 0 ], data, @view.callbacks
+        view = new View @iterated[ index ].els[ 0 ], data, @view.callbacks
 
         @iterated[ index ].unbind()
         @iterated[ index ] = view
@@ -164,3 +166,5 @@ binders[ 'class-*' ] = (el, value) ->
 
 binders[ 'no-class-*' ] = (el, value) -> binders[ 'class-*' ].call @, el, not value
 binders[ '*' ] = (el, value) -> el[ if value then 'setAttribute' else 'removeAttribute' ] @type, value
+
+module.exports = binders

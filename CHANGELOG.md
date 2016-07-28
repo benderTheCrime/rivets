@@ -2,6 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.4] - 2016-07-28
+### Added
+- n/a
+
+### Changed
+- n/a
+
+### Fixed
+- n/a
+
+### Removed
+- Removed gulp build system (replaced with npm scripts)
+
 ## [1.7.3] - 2016-07-13
 ### Added
 - n/a

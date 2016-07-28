@@ -1,10 +1,10 @@
-View = Rivets.View = class
+module.exports = View = class
   constructor: (@els, @models, @callbacks = {}) ->
     @els = [ @els ] unless @els instanceof Array
-    @binders = Rivets.binders
+    @binders = require './binder/binder.coffee'
     @build()
 
-  bindingRegExp: => new RegExp "^cb-"
+  bindingRegExp: => new RegExp '^cb-'
   buildBinding: (binding, node, type, declaration) =>
     @bindings.push new Rivets[ binding ] @, node, type, View.parseDeclaration(declaration)...
 
