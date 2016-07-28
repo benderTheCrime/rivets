@@ -1,5 +1,5 @@
-module.exports = (binders) ->
-  binders.checked =
+module.exports =
+  checked:
     publishes: true
     priority: 2000
 
@@ -7,12 +7,10 @@ module.exports = (binders) ->
     unbind: (el) -> el.addEventListener 'change', @publish
     routine: (el, value) -> el.checked = !!value
 
-  binders.unchecked =
+  unchecked:
     publishes: true
     priority: 2000
 
     bind: (el) -> el.addEventListener 'change', @publish
     unbind: (el) -> el.addEventListener 'change', @publish
     routine: (el, value) -> el.checked = !value
-
-  binders

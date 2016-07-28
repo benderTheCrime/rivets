@@ -1,5 +1,5 @@
-module.exports = Observer = Rivets.Observer = class
-  constructor: (@callbacks = {}) -> @
+module.exports = class
+  constructor: (@callbacks = {}) ->
   observe: (@obj, keypath, callback) ->
     @keypath = keypath unless @keypath
     keys = keypath.split '.'
@@ -19,7 +19,9 @@ module.exports = Observer = Rivets.Observer = class
     Object.defineProperty parentValue, key,
       enumerable: true
       configurable: true
-      get: -> value
+      get: ->
+        # _value = Object.getOwnPropertyDescriptor(parentValue, key).get() || value
+        value
       set: (newValue) =>
         if value isnt newValue
           value = newValue

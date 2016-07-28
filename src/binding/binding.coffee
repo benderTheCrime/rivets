@@ -1,76 +1,84 @@
-Binding = Rivets.Binding = class
-  constructor: (@view, @el, @type, @keypath, @formatters) ->
-    @callbacks = @view.callbacks or {}
+Observer = require '../observer.coffee'
+View = require '../view.coffee'
+TypeParser = require '../parser/type-parser.coffee'
 
-    unless @binder = @view.binders[ @type ]
-      for identifier, value of @view.binders
-        if identifier isnt '*' and identifier.indexOf('*') isnt -1
-          regexp = new RegExp "^#{identifier.replace(/\*/g, '.+')}$"
-          if regexp.test @type
-            @binder = value
-            @args = new RegExp("^#{identifier.replace(/\*/g, '(.+)')}$").exec @type
-            @args.shift()
+module.exports = (Rivets) ->
+  View = require('../view.coffee') Rivets
+  Binding = class
+    constructor: (@view, @el, @type, @keypath, @formatters) ->
+      @callbacks = @view.callbacks or {}
 
-    @binder or= @view.binders[ '*' ]
-    @binder = { routine: @binder } if @binder instanceof Function
+      unless @binder = @view.binders[ @type ]
+        for identifier, value of @view.binders
+          if identifier isnt '*' and identifier.indexOf('*') isnt -1
+            regexp = new RegExp "^#{identifier.replace(/\*/g, '.+')}$"
+            if regexp.test @type
+              @binder = value
+              @args = new RegExp("^#{identifier.replace(/\*/g, '(.+)')}$").exec @type
+              @args.shift()
 
-  observe: (obj, keypath, callback) =>
-    (observer = new Observer @callbacks).observe arguments...
-    observer
+      @binder or= @view.binders[ '*' ]
+      @binder = { routine: @binder } if @binder instanceof Function
 
-  templatedValue: (value) =>
-    if value and typeof value is 'string' and @observer
-      for declaration in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
-        [ keypath, formatters ] = View.parseDeclaration declaration.replace /[\{\}]/g, ''
-        value = value.replace declaration, Binding.formattedValue(@observer.walkObjectKeypath(@observer.obj, keypath) or '', formatters)
+    observe: (obj, keypath, callback) =>
+      (observer = new Observer @callbacks).observe arguments...
+      observer
 
-        @observer.observe @observer.obj, keypath, @sync
+    templatedValue: (value) =>
+      if value and typeof value is 'string' and @observer
+        for declaration in value.match(Rivets.STRING_TEMPLATE_REGEXP) ? []
+          [ keypath, formatters ] = View.parseDeclaration declaration.replace /[\{\}]/g, ''
+          value = value.replace declaration, Binding.formattedValue(@observer.walkObjectKeypath(@observer.obj, keypath) or '', formatters)
 
-    Binding.formattedValue value, @formatters
+          @observer.observe @observer.obj, keypath, @sync
 
-  eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
-  set: (value) => @binder.routine?.call @, @el, @templatedValue value
-  sync: => @set if @observer then @observer.get()
-  publish: =>
-    if @observer
-      value = @getValue @el
+      Binding.formattedValue value, @formatters
 
-      for formatter in @formatters.slice(0).reverse()
-        args = formatter.split /\s+/
+    eventHandler: (fn) => (ev) => Rivets.handler.call fn, @, ev, @
+    set: (value) => @binder.routine?.call @, @el, @templatedValue value
+    sync: => @set if @observer then @observer.get()
+    publish: =>
+      if @observer
+        value = @getValue @el
+
+        for formatter in @formatters.slice(0).reverse()
+          args = formatter.split /\s+/
+          id = args.shift()
+
+        @observer.set value
+
+    bind: =>
+      token = TypeParser.parse @keypath
+
+      if token.type is 0
+        @value = token.value
+      else
+        @observer = @observe @view.models, @keypath, @sync
+
+      @binder.bind?.call @, @el
+      @sync()
+
+    unbind: =>
+      @binder.unbind?.call @, @el
+      delete @observer
+
+    update: (models = {}) => @binder.update?.call @, models or @sync()
+
+    getValue: (el) =>
+      if @binder and @binder.getValue?
+        @binder.getValue.call @, el
+      else
+        @getInputValue el
+
+    getInputValue: (el) -> if el.type is 'checkbox' then el.checked else el.value
+
+    @formattedValue: (value, formatters) =>
+      for formatter, fi in formatters
+        args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
         id = args.shift()
+        formatter = Rivets.formatters[ id ]
+        value = formatter value or '' if formatter instanceof Function
 
-      @observer.set value
+      value
 
-  bind: =>
-    token = Rivets.TypeParser.parse @keypath
-
-    if token.type is 0
-      @value = token.value
-    else
-      @observer = @observe @view.models, @keypath, @sync
-
-    @binder.bind?.call @, @el
-    @sync()
-
-  unbind: =>
-    @binder.unbind?.call @, @el
-    delete @observer
-
-  update: (models = {}) => @binder.update?.call @, models or @sync()
-
-  getValue: (el) =>
-    if @binder and @binder.getValue?
-      @binder.getValue.call @, el
-    else
-      @getInputValue el
-
-  getInputValue: (el) -> if el.type is 'checkbox' then el.checked else el.value
-
-  @formattedValue: (value, formatters) =>
-    for formatter, fi in formatters
-      args = formatter.match /[^\s']+|'([^']|'[^\s])*'|"([^"]|"[^\s])*"/g
-      id = args.shift()
-      formatter = Rivets.formatters[ id ]
-      value = formatter value or '' if formatter instanceof Function
-
-    value
+  Binding
