@@ -19,10 +19,10 @@ const SRC = [
 ];
 
 gulp.task('build', function() {
-    gulp.src([ './src/binder/**.coffee', '!./src/binder/binder.coffee' ])
+    gulp.src([ './src/lib/**.coffee', '!./src/lib/binder.coffee' ])
         .pipe(rename({ ext: '.js' }))
         .pipe(coffee({ bare: true }).on('error', util.log))
-        .pipe(gulp.dest('dist/binder'));
+        .pipe(gulp.dest('lib/binder'));
 
     return gulp.src(SRC)
         .pipe(concat('tiny-rivets.js'))
