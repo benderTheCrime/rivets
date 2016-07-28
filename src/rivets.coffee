@@ -8,7 +8,7 @@ module.exports =
     (view = new Rivets.View el, models).bind()
     view
   Observer: require './observer.coffee'
-  View: require './view.coffee'
-  TypeParser: require './parser/type-parser.coffee'
-  Binding: require './binding/binding.coffee'
-  binders: require './binder/binder.coffee'
+
+Rivets.View = require('./view.coffee') Rivets
+Rivets.Binding = require('./binding/binding.coffee') Rivets
+Rivets.binders = require('./binder/binder.coffee') Rivets
