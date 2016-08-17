@@ -146,8 +146,6 @@ binders[ 'each-*' ] =
 
       view.bind()
 
-      delete data[ modelName ]
-
     if el.nodeName is 'OPTION'
       for binding in @view.bindings
         if binding.el is @marker.parentNode and binding.type is 'value'

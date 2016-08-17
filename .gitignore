@@ -316,4 +316,5 @@ local.properties
 
 
 ### Custom ###
+dist
 npm-shrinkwrap.json
