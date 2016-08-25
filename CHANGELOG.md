@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.6] - 2016-08-25
+### Added
+- n/a
+
+### Changed
+- Moved packages from `devDependencies` to `dependencies` to resolve
+installation issues.
+
+### Fixed
+- n/a
+
+### Removed
+- n/a
+
 ## [1.7.5] - 2016-08-17
 ### Added
 - n/a
